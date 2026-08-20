@@ -70,7 +70,7 @@ function postRevisionsPlugin(): Plugin {
  * P0-2 RSS 订阅:构建期从 src/content/posts/*.md 生成 RSS 2.0 feed。
  * 经 emitFile 写入 dist/feed.xml;SITE_URL 可用环境变量覆盖(本地构建默认 Pages 地址)。
  */
-const SITE_URL = (process.env.SITE_URL ?? 'https://enyerere.github.io/Personal-website').replace(/\/$/, '')
+const SITE_URL = (process.env.SITE_URL ?? 'https://enyerere.github.io/manuscript-archive').replace(/\/$/, '')
 const SITE_TITLE = '姚沈峄'
 const SITE_DESC = '手稿档案 · 个人博客'
 /** 搜索引擎/社交分享用的完整描述 */
@@ -316,7 +316,7 @@ ${urls
 }
 
 export default defineConfig({
-  // GitHub Pages 部署在 /Personal-website/ 子路径;本地预览保持根路径
+  // GitHub Pages 部署在 /manuscript-archive/ 子路径;本地预览保持根路径
   base: process.env.VITE_BASE ?? '/',
   plugins: [react(), postRevisionsPlugin(), rssFeedPlugin(), githubDataPlugin(), seoPlugin()],
   resolve: {

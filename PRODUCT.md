@@ -174,8 +174,8 @@ brand
 
 ## Deployment
 
-- **托管**:GitHub Pages,https://enyerere.github.io/Personal-website/ ;push main 经 GitHub Actions 自动构建部署(`.github/workflows/deploy.yml`)
-- **子路径**:Pages 构建注入 `VITE_BASE=/Personal-website/`;本地预览保持根路径。`index.html` 中的静态资源引用(favicon、manifest、feed)一律用绝对地址——SPA 深链接下根相对路径会解析错误
+- **托管**:GitHub Pages,https://enyerere.github.io/manuscript-archive/ ;push main 经 GitHub Actions 自动构建部署(`.github/workflows/deploy.yml`)
+- **子路径**:Pages 构建注入 `VITE_BASE=/manuscript-archive/`;本地预览保持根路径。`index.html` 中的静态资源引用(favicon、manifest、feed)一律用绝对地址——SPA 深链接下根相对路径会解析错误
 - **SPA 深链接**:`public/404.html` 编码 + `index.html` 解码脚本回退
 - **构建期注入**:文章 git 版本(virtual:post-revisions,checkout 需 `fetch-depth: 0`)、`dist/feed.xml`(RSS 2.0,最新 20 篇已发布文章)、GitHub 活数据(virtual:github-projects / virtual:github-languages,API 失败降级为配置信息,构建不中断)
 - **定时重建**:每周一 03:17 UTC 触发,刷新关于页的 GitHub 项目与语言数据,无需 push 代码

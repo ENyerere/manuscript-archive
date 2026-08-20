@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://enyerere.github.io/Personal-website/sitemap.xml
+Sitemap: https://enyerere.github.io/manuscript-archive/sitemap.xml
