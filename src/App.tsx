@@ -1,11 +1,12 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import Layout from '@/components/layout/Layout'
 import HomePage from '@/routes/HomePage'
 
 // 路由级代码分割:首页保持即时加载,其余路由按需加载
 // (文章页带走 react-markdown/rehype-highlight 等大依赖,不进首屏 bundle)
-const PostPage = lazy(() => import('@/routes/PostPage'))
+const loadPostPage = () => import('@/routes/PostPage')
+const PostPage = lazy(loadPostPage)
 const ArchivesPage = lazy(() => import('@/routes/ArchivesPage'))
 const TagsPage = lazy(() => import('@/routes/TagsPage'))
 const TagPage = lazy(() => import('@/routes/TagPage'))
@@ -42,5 +43,11 @@ const router = createBrowserRouter([
 ])
 
 export default function App() {
+  // 进站即预热文章阅读页 chunk:不影响首屏(并行后台加载),
+  // 避免用户首次点击文章时 chunk 才拉取造成的闪屏
+  useEffect(() => {
+    loadPostPage()
+  }, [])
+
   return <RouterProvider router={router} />
 }
