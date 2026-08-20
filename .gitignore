@@ -46,3 +46,6 @@ pnpm-debug.log*
 
 # TypeScript build info
 *.tsbuildinfo
+
+# CI deploy private key (never commit)
+deploy/ci_deploy_key
