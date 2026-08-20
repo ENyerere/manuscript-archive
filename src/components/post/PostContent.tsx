@@ -77,7 +77,12 @@ export default function PostContent({ content }: PostContentProps) {
 
   return (
     <div className="max-w-none">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]} components={components}>
+      {/* detect:false 避免语言误猜;ignoreMissing 让未注册的围栏语言退化为纯文本 */}
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[[rehypeHighlight, { detect: false, ignoreMissing: true }]]}
+        components={components}
+      >
         {content}
       </ReactMarkdown>
     </div>

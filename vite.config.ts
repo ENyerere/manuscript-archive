@@ -73,6 +73,8 @@ function postRevisionsPlugin(): Plugin {
 const SITE_URL = (process.env.SITE_URL ?? 'https://enyerere.github.io/Personal-website').replace(/\/$/, '')
 const SITE_TITLE = '姚沈峄'
 const SITE_DESC = '手稿档案 · 个人博客'
+/** 搜索引擎/社交分享用的完整描述 */
+const SEO_DESC = '姚沈峄的个人博客:手稿档案风格的技术笔记、项目总结与个人随笔,支持标签检索、系列连载与 RSS 订阅。'
 
 function xmlEscape(s: string): string {
   return s
@@ -247,10 +249,76 @@ function githubDataPlugin(): Plugin {
   }
 }
 
+/**
+ * SEO:构建期生成 sitemap.xml,并向 index.html 注入 OG/Twitter meta。
+ * 注意:SPA 壳全站共用一套站点级 meta;文章级 OG 需逐路由预渲染,当前未做。
+ */
+function seoPlugin(): Plugin {
+  return {
+    name: 'seo',
+    transformIndexHtml() {
+      return [
+        { tag: 'meta', attrs: { name: 'description', content: SEO_DESC }, injectTo: 'head' },
+        { tag: 'meta', attrs: { property: 'og:type', content: 'website' }, injectTo: 'head' },
+        { tag: 'meta', attrs: { property: 'og:site_name', content: SITE_TITLE }, injectTo: 'head' },
+        { tag: 'meta', attrs: { property: 'og:title', content: `${SITE_TITLE} · ${SITE_DESC}` }, injectTo: 'head' },
+        { tag: 'meta', attrs: { property: 'og:description', content: SEO_DESC }, injectTo: 'head' },
+        { tag: 'meta', attrs: { property: 'og:url', content: `${SITE_URL}/` }, injectTo: 'head' },
+        { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary' }, injectTo: 'head' },
+        { tag: 'meta', attrs: { name: 'twitter:title', content: `${SITE_TITLE} · ${SITE_DESC}` }, injectTo: 'head' },
+        { tag: 'meta', attrs: { name: 'twitter:description', content: SEO_DESC }, injectTo: 'head' },
+      ]
+    },
+    generateBundle() {
+      const postsDir = path.resolve(__dirname, 'src/content/posts')
+      const posts = readdirSync(postsDir)
+        .filter((f) => f.endsWith('.md'))
+        .map((f) => {
+          const { data } = parseFrontMatter(readFileSync(path.join(postsDir, f), 'utf-8'))
+          return {
+            slug: String(data.slug || f.replace(/\.md$/, '')),
+            tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
+            series: data.series ? String(data.series) : null,
+            published: data.published !== false,
+            lastmod: String(data.updatedAt || data.createdAt || '').slice(0, 10),
+          }
+        })
+        .filter((p) => p.published && !Number.isNaN(new Date(p.lastmod).getTime()))
+
+      const urls: { loc: string; lastmod?: string }[] = [
+        { loc: '/' },
+        { loc: '/archives' },
+        { loc: '/tags' },
+        { loc: '/about' },
+        ...posts.map((p) => ({ loc: `/posts/${p.slug}`, lastmod: p.lastmod })),
+        ...Array.from(new Set(posts.map((p) => p.series).filter(Boolean))).map((s) => ({
+          loc: `/series/${encodeURIComponent(s as string)}`,
+        })),
+        ...Array.from(new Set(posts.flatMap((p) => p.tags))).map((t) => ({
+          loc: `/tags/${encodeURIComponent(t)}`,
+        })),
+      ]
+
+      const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls
+  .map(
+    (u) => `  <url>
+    <loc>${SITE_URL}${u.loc}</loc>${u.lastmod ? `\n    <lastmod>${u.lastmod}</lastmod>` : ''}
+  </url>`,
+  )
+  .join('\n')}
+</urlset>
+`
+      this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: xml })
+    },
+  }
+}
+
 export default defineConfig({
   // GitHub Pages 部署在 /Personal-website/ 子路径;本地预览保持根路径
   base: process.env.VITE_BASE ?? '/',
-  plugins: [react(), postRevisionsPlugin(), rssFeedPlugin(), githubDataPlugin()],
+  plugins: [react(), postRevisionsPlugin(), rssFeedPlugin(), githubDataPlugin(), seoPlugin()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
