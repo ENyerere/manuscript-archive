@@ -1,29 +1,19 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import { lazy, Suspense, useEffect } from 'react'
 import Layout from '@/components/layout/Layout'
 import HomePage from '@/routes/HomePage'
 
-// 路由级代码分割:首页保持即时加载,其余路由按需加载
-// (文章页带走 react-markdown/rehype-highlight 等大依赖,不进首屏 bundle)
+// 路由级代码分割:使用 React Router 的 route.lazy 而非 React.lazy + Suspense。
+// 关键差异:route.lazy 导航期间保留旧页面渲染,模块就绪后再切换,
+// 不存在"加载中…"兜底 UI 出场的机会,从机制上消除闪屏。
 const loadPostPage = () => import('@/routes/PostPage')
-const PostPage = lazy(loadPostPage)
-const ArchivesPage = lazy(() => import('@/routes/ArchivesPage'))
-const TagsPage = lazy(() => import('@/routes/TagsPage'))
-const TagPage = lazy(() => import('@/routes/TagPage'))
-const SeriesPage = lazy(() => import('@/routes/SeriesPage'))
-const AboutPage = lazy(() => import('@/routes/AboutPage'))
-const NotFoundPage = lazy(() => import('@/routes/NotFoundPage'))
+// 模块求值即预热文章页 chunk:与主包并行下载,用户进站后首次点击文章时通常已就绪
+// (文章页带走 react-markdown/rehype-highlight 等大依赖,不进首屏 bundle)
+void loadPostPage()
 
-/** 懒加载路由的悬挂态:hairline 风格,静默不抢眼 */
-function Pending() {
-  return (
-    <div className="py-24">
-      <p className="font-mono text-xs text-muted-foreground tracking-[0.08em]">加载中…</p>
-    </div>
-  )
-}
-
-const lazy_ = (element: React.ReactNode) => <Suspense fallback={<Pending />}>{element}</Suspense>
+/** route.lazy 适配器:把默认导出的页面组件包成 { Component } 形态 */
+const lazyRoute = (loader: () => Promise<{ default: React.ComponentType }>) => async () => ({
+  Component: (await loader()).default,
+})
 
 const router = createBrowserRouter([
   {
@@ -31,23 +21,17 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: 'posts/:slug', element: lazy_(<PostPage />) },
-      { path: 'archives', element: lazy_(<ArchivesPage />) },
-      { path: 'tags', element: lazy_(<TagsPage />) },
-      { path: 'tags/:tag', element: lazy_(<TagPage />) },
-      { path: 'series/:name', element: lazy_(<SeriesPage />) },
-      { path: 'about', element: lazy_(<AboutPage />) },
-      { path: '*', element: lazy_(<NotFoundPage />) },
+      { path: 'posts/:slug', lazy: lazyRoute(loadPostPage) },
+      { path: 'archives', lazy: lazyRoute(() => import('@/routes/ArchivesPage')) },
+      { path: 'tags', lazy: lazyRoute(() => import('@/routes/TagsPage')) },
+      { path: 'tags/:tag', lazy: lazyRoute(() => import('@/routes/TagPage')) },
+      { path: 'series/:name', lazy: lazyRoute(() => import('@/routes/SeriesPage')) },
+      { path: 'about', lazy: lazyRoute(() => import('@/routes/AboutPage')) },
+      { path: '*', lazy: lazyRoute(() => import('@/routes/NotFoundPage')) },
     ],
   },
 ])
 
 export default function App() {
-  // 进站即预热文章阅读页 chunk:不影响首屏(并行后台加载),
-  // 避免用户首次点击文章时 chunk 才拉取造成的闪屏
-  useEffect(() => {
-    loadPostPage()
-  }, [])
-
   return <RouterProvider router={router} />
 }
