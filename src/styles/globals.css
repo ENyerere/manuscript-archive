@@ -93,6 +93,12 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* 始终显示纵向滚动条:短页(归档/标签)与长页(首页/关于)切换时视口宽度恒定,消除布局横移。
+       自绘滚动条(见文件底部)轨道透明,短页上 8px 轨道视觉不可见。
+       注:仅用 scrollbar-gutter: stable 在自绘 ::-webkit-scrollbar 下不生效,故用 overflow-y 兜底 */
+    overflow-y: scroll;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--muted-foreground) / 0.3) transparent;
   }
   body {
     @apply bg-background text-foreground;
