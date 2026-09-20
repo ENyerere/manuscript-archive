@@ -71,10 +71,10 @@ function postRevisionsPlugin(): Plugin {
  * 经 emitFile 写入 dist/feed.xml;SITE_URL 可用环境变量覆盖(本地构建默认 Pages 地址)。
  */
 const SITE_URL = (process.env.SITE_URL ?? 'https://enyerere.github.io/manuscript-archive').replace(/\/$/, '')
-const SITE_TITLE = '姚沈峄'
+const SITE_TITLE = '小峄热心市民'
 const SITE_DESC = '手稿档案 · 个人博客'
 /** 搜索引擎/社交分享用的完整描述 */
-const SEO_DESC = '姚沈峄的个人博客:手稿档案风格的技术笔记、项目总结与个人随笔,支持标签检索、系列连载与 RSS 订阅。'
+const SEO_DESC = '小峄热心市民的个人博客:手稿档案风格的技术笔记、项目总结与个人随笔,支持标签检索、系列连载与 RSS 订阅。'
 
 function xmlEscape(s: string): string {
   return s
