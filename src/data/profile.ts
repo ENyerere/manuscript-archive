@@ -7,8 +7,8 @@ export interface Profile {
 }
 
 export const profile: Profile = {
-  name: '姚沈峄',
+  name: '小峄热心市民',
   role: 'Student',
   avatar: '/img/头像.JPG',
-  about: 'Welcome to my personal introduction page, I am Yao Shenyi, a nobody from Zhejiang Vocational College of Economics and Trade.',
+  about: '一名普通大学生,喜欢前端开发与软件测试,偶尔写写代码,常常写写文字。这里是我的手稿档案:记录学习,也记录生活。',
 }
