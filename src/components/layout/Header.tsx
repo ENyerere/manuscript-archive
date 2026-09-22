@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   NavigationMenu,
@@ -24,10 +24,26 @@ export default function Header() {
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [menuVisible, setMenuVisible] = useState(false)
+  const closeTimer = useRef<number | null>(null)
 
-  // 路由变化(点击链接跳转)时关闭全屏导航
+  // 关闭:先播 300ms 淡出(可见性置 false),动画结束后再卸载
+  const closeMenu = () => {
+    setMenuVisible(false)
+    if (closeTimer.current) window.clearTimeout(closeTimer.current)
+    closeTimer.current = window.setTimeout(() => setMenuOpen(false), 300)
+  }
+
+  // 卸载时清理未完成的关闭定时器
   useEffect(() => {
-    setMenuOpen(false)
+    return () => {
+      if (closeTimer.current) window.clearTimeout(closeTimer.current)
+    }
+  }, [])
+
+  // 路由变化(浏览器前进/后退等)时关闭全屏导航
+  useEffect(() => {
+    if (menuOpen) closeMenu()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname])
 
   // 打开后下一帧再加 visible,触发淡入/上浮过渡;同时锁定背景滚动
@@ -48,7 +64,7 @@ export default function Header() {
   useEffect(() => {
     if (!menuOpen) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMenuOpen(false)
+      if (e.key === 'Escape') closeMenu()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -121,7 +137,7 @@ export default function Header() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setMenuOpen(false)}
+              onClick={closeMenu}
               aria-label="关闭菜单"
             >
               <X className="h-5 w-5" />
@@ -135,7 +151,7 @@ export default function Header() {
                 key={item.to}
                 to={item.to}
                 aria-current={isActive(item.to) ? 'page' : undefined}
-                onClick={() => setMenuOpen(false)}
+                onClick={closeMenu}
                 style={{ transitionDelay: menuVisible ? `${120 + i * 70}ms` : '0ms' }}
                 className={`flex items-baseline gap-4 py-5 border-b border-border/60 transition-all duration-500 ${
                   menuVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
