@@ -7,7 +7,7 @@ function prefersReducedMotion(): boolean {
 
 /**
  * 滚动动画 Hook
- * 管理顶部进度条宽度与回到顶部按钮显隐。
+ * 管理顶部进度条缩放与回到顶部按钮显隐。
  * 所有动画均尊重 prefers-reduced-motion(平滑滚动退化为瞬时跳转)。
  */
 export function useScrollAnimation() {
@@ -22,22 +22,32 @@ export function useScrollAnimation() {
   }, [])
 
   useEffect(() => {
-    // 初始化一次,保证刷新后进度条与按钮状态正确
-    const handleScroll = () => {
+    // rAF 节流:滚动事件合并到每帧一次,进度条 transform 逐帧直更(不触发重排)
+    let ticking = false
+
+    const update = () => {
+      ticking = false
       const scrollTop = document.documentElement.scrollTop || document.body.scrollTop
       const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight
-      const scrollPercent = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0
+      const scrollPercent = scrollHeight > 0 ? scrollTop / scrollHeight : 0
 
-      // 更新进度条宽度
+      // scaleX 进度:合成器缩放,视觉与 width 一致但无 reflow
       if (scrollProgressRef.current) {
-        scrollProgressRef.current.style.width = scrollPercent + '%'
+        scrollProgressRef.current.style.transform = `scaleX(${scrollPercent})`
       }
 
       // 更新回到顶部按钮显隐
       setBackToTopVisible(scrollTop > 300)
     }
 
-    handleScroll()
+    const handleScroll = () => {
+      if (!ticking) {
+        ticking = true
+        requestAnimationFrame(update)
+      }
+    }
+
+    update()
 
     // passive: true 避免滚动事件阻塞主线程导致卡顿
     window.addEventListener('scroll', handleScroll, { passive: true })
