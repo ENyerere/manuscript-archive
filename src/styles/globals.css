@@ -255,6 +255,20 @@
   z-index: 2147483646;
 }
 
+/* iOS 等 View Transitions 降级路径的动效补偿:
+ * 切换瞬间挂上此类,全站颜色/背景/边框在 300ms 内渐变到新主题 */
+.theme-color-fade,
+.theme-color-fade *,
+.theme-color-fade *::before,
+.theme-color-fade *::after {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    fill 0.3s ease,
+    stroke 0.3s ease !important;
+}
+
 /* 尊重 reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,
