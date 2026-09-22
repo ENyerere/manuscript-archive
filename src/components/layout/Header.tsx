@@ -5,9 +5,6 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from '@/components/ui/navigation-menu'
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
-import { Menu } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import { profile } from '@/data/profile'
 
@@ -57,34 +54,28 @@ export default function Header() {
 
         <div className="flex items-center gap-1">
           <ThemeToggle />
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden" aria-label="打开菜单">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="border-l border-border">
-              <nav className="flex flex-col gap-1 mt-10">
-                {navItems.map((item) => (
-                  <SheetClose asChild key={item.to}>
-                    <Link
-                      to={item.to}
-                      aria-current={isActive(item.to) ? 'page' : undefined}
-                      className={`px-1 py-2.5 text-base transition-colors border-b border-border/60 ${
-                        isActive(item.to)
-                          ? 'text-foreground font-medium'
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      {item.label}
-                    </Link>
-                  </SheetClose>
-                ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
         </div>
       </div>
+
+      {/* 移动端导航:常驻档案标签行,hairline 分隔,与全站行式语言一致 */}
+      <nav className="md:hidden border-t border-border/60">
+        <div className="w-full max-w-[var(--page-width)] mx-auto px-2 flex divide-x divide-border/60">
+          {navItems.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              aria-current={isActive(item.to) ? 'page' : undefined}
+              className={`flex-1 py-2.5 text-center text-sm transition-colors underline-offset-4 ${
+                isActive(item.to)
+                  ? 'text-foreground font-medium underline'
+                  : 'text-muted-foreground'
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      </nav>
     </header>
   )
 }
