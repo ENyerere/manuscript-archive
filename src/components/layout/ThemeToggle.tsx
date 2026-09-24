@@ -25,8 +25,9 @@ function isIosWebKit(): boolean {
 /**
  * 主题切换:新主题以圆形 clip-path 从点击位置扩散揭示(View Transitions API)。
  * 降级链:
- * - prefers-reduced-motion / 浏览器不支持 / iOS WebKit → 瞬时切换,
- *   并用 .theme-color-fade 做一次全站颜色渐变作为动效补偿。
+ * - prefers-reduced-motion → 瞬时切换,无动效
+ * - 浏览器不支持 / iOS WebKit → 单元素遮罩擦除(.theme-wipe):
+ *   目标主题色全屏遮罩淡入 → 遮罩下瞬时翻转 → 淡出揭示。
  */
 export default function ThemeToggle() {
   const { isDark, toggleTheme } = useTheme()
@@ -36,14 +37,23 @@ export default function ThemeToggle() {
     const startViewTransition = (document as DocumentWithViewTransition).startViewTransition
 
     if (reduced || !startViewTransition || isIosWebKit()) {
-      // 颜色渐变补偿:加类 → 切换 → 动画结束后移除(避免影响后续其他过渡)
       if (!reduced) {
-        document.documentElement.classList.add('theme-color-fade')
+        // 单元素遮罩擦除:覆盖层淡入 → 主题瞬时翻转 → 覆盖层淡出。
+        // 避免全 DOM 逐元素颜色渐变在 iOS 上的分批延迟与卡顿。
+        const overlay = document.createElement('div')
+        overlay.className = 'theme-wipe'
+        // 遮罩色 = 目标主题纸面色(当前暗 → 遮罩纸白;当前亮 → 遮罩墨黑)
+        overlay.style.background = isDark ? '#fafafa' : '#0a0a0a'
+        document.body.appendChild(overlay)
+        requestAnimationFrame(() => overlay.classList.add('theme-wipe-in'))
         window.setTimeout(() => {
-          document.documentElement.classList.remove('theme-color-fade')
-        }, 350)
+          toggleTheme()
+          overlay.classList.add('theme-wipe-out')
+          window.setTimeout(() => overlay.remove(), 260)
+        }, 170)
+      } else {
+        toggleTheme()
       }
-      toggleTheme()
       return
     }
 
