@@ -255,18 +255,22 @@
   z-index: 2147483646;
 }
 
-/* iOS 等 View Transitions 降级路径的动效补偿:
- * 切换瞬间挂上此类,全站颜色/背景/边框在 300ms 内渐变到新主题 */
-.theme-color-fade,
-.theme-color-fade *,
-.theme-color-fade *::before,
-.theme-color-fade *::after {
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease,
-    border-color 0.3s ease,
-    fill 0.3s ease,
-    stroke 0.3s ease !important;
+/* View Transitions 降级路径的动效补偿(单元素遮罩擦除):
+ * 全屏遮罩以目标主题色淡入 → 遮罩下主题瞬时翻转 → 遮罩淡出。
+ * 仅一个合成器元素参与动画,规避 iOS 全 DOM 逐元素颜色渐变的分批延迟。 */
+.theme-wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 150ms ease-in;
+}
+.theme-wipe-in {
+  opacity: 1;
+}
+.theme-wipe-out {
+  opacity: 0;
+  transition: opacity 220ms ease-out;
 }
 
 /* 尊重 reduced motion */
