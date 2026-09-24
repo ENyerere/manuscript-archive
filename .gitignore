@@ -49,3 +49,6 @@ pnpm-debug.log*
 
 # CI deploy private key (never commit)
 deploy/ci_deploy_key
+
+# Temp screenshots / scratch
+.tmp/
