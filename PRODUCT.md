@@ -105,7 +105,14 @@ brand
 
 ### 移动端
 
-- 单栏;元数据栏折行到标题上方;TOC 隐藏;页头折叠为菜单
+- 单栏;元数据栏折行到标题上方;TOC 隐藏
+- 页头导航折叠为汉堡按钮,点击展开**全屏索引页**(非抽屉):整页覆盖,顶行 `索引 / INDEX` + × 关闭,中部大字号序号目录(01–04,hairline 分隔,当前页下划线 + 「当前」标记),底部卷末标记;开 300ms 淡入 + 目录行 70ms 错峰上浮,关 300ms 淡出后卸载;Esc 可关,打开时锁定背景滚动
+
+### 平台适配(iOS / WebKit)
+
+- **View Transitions 禁用**:iOS Safari 对快照合成支持有缺陷,`isIosWebKit()` 检测后一律走降级路径;动效补偿用**单元素遮罩擦除**(`.theme-wipe`:目标主题色全屏遮罩 150ms 淡入 → 遮罩下主题瞬时翻转 → 220ms 淡出)。不要回退到全 DOM 逐元素颜色渐变——iOS 样式重算分批调度会导致文字变色撕裂(已踩坑)
+- **浏览器 chrome 取色**:`index.html` 必须带 `viewport-fit=cover` 与亮/暗两个 `theme-color` 默认值;`useTheme` 每次切换同步更新无 media 的 `theme-color` 元标签——网址栏、状态栏、灵动岛两侧才能与页面同帧变色
+- **滚动进度条**:`transform: scaleX()` 合成器渲染 + rAF 节流逐帧直更;禁止 `width` + CSS 过渡(重排导致 iOS 滚动卡顿、过渡反复重启)
 
 ## Motion
 
@@ -124,14 +131,14 @@ brand
 - 点击主题切换按钮时,新主题快照以 `clip-path: circle()` 从点击位置扩散至覆盖全屏(View Transitions API)
 - 时长 500ms,`ease-in-out`;键盘激活时从按钮中心起晕
 - 语义:全页级、低频、用户主动的全局状态切换,扩散精确表达「整个页面正在反转」——墨晕于纸,暗合手稿隐喻
-- 降级:`prefers-reduced-motion` 或浏览器不支持 View Transitions API → 瞬时切换
+- 降级:`prefers-reduced-motion`、浏览器不支持 View Transitions API,或 **iOS WebKit**(快照合成缺陷:亮度跳变、chrome 区域不同步、掉帧)→ 单元素遮罩擦除 `.theme-wipe`(见「平台适配」);reduced-motion 下为纯瞬时切换
 
 ### 次级动效
 
 - 列表条目入场:opacity + translateY(8px),错峰 `index × 100ms`,400ms,一次性
 - 过滤切换:不匹配条目衰减至 `opacity: 0.3`(不移除、不重排),300ms
 - 社交/页脚链接:下划线从左到右生长的 hover 动画(200ms);线高 2px(1px 在半像素对齐时会被抗锯齿拆淡,已修复)
-- 滚动进度条、回到顶部:保留现有实现,样式改为 hairline/单色
+- 滚动进度条:`scaleX` 合成器渲染 + rAF 逐帧直更(见「平台适配」);回到顶部:保留现有实现,样式 hairline/单色
 
 ### 降级
 
@@ -139,7 +146,7 @@ brand
 
 ## Components & Conventions
 
-- **基础组件**:继续使用 shadcn/ui(Button/Badge/Sheet/NavigationMenu 等),但皮肤重写:无圆角(或小至 2px)、无阴影、hairline 边框、单色
+- **基础组件**:继续使用 shadcn/ui(Button/NavigationMenu 等),但皮肤重写:无圆角(或小至 2px)、无阴影、hairline 边框、单色;未使用的组件(badge/card/separator/sheet)已从仓库移除,不留死代码
 - **过滤器约定**(标签/分类):文字按钮,激活态用 bracket 包裹——`> 前端 <`(`::before`/`::after` 注入),非激活为纯文字;不用 Badge 色块
 - **检索条**(首页):hairline 底线输入,mono 字体;检索标题/摘要/标签/正文,与标签过滤叠加,未命中条目衰减;`/` 聚焦、`Esc` 清空
 - **系列约定**:front matter `series` 字段;文章页元数据块 `series: [名] 第 N / M 篇`;合集页 `/series/:name` 按时间正序;首页条目元信息行标注「系列名 · 其一/其二」;前后篇导航系列内优先、边界退回全站
