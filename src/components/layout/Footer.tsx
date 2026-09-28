@@ -39,6 +39,17 @@ export default function Footer() {
           <p>&copy; {new Date().getFullYear()} {profile.name}</p>
           <p className="font-mono text-xs">manuscript · archival · precise</p>
         </div>
+        {/* ICP 备案号(合规要求:页脚展示并链接至工信部备案系统) */}
+        <div className="pt-4 text-xs opacity-40">
+          <a
+            href="https://beian.miit.gov.cn"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono hover:underline underline-offset-4"
+          >
+            浙ICP备2026081575号-1
+          </a>
+        </div>
       </div>
     </footer>
   )
