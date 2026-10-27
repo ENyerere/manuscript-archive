@@ -2,7 +2,7 @@
 title: 关于我
 slug: about-me
 excerpt: 一名普通大学生,热爱前端开发与软件测试,喜欢用代码记录生活,用像素构筑梦想。
-tags: [随笔, 个人]
+tags: [随笔]
 createdAt: 2025-03-15
 ---
 

@@ -74,7 +74,8 @@ brand
 
 - **标题**:系统黑体 + 字重区分,字距收紧 `letter-spacing: -0.015em`(大标题可到 `-0.03em`);中文标题不斜体(中文无真斜体)
 - **标签体系**:拉丁小标签用 12px / 600 / uppercase / tracking 0.08em;中文标签用同字号 + 字重 500,不强行大写
-- **YAML 元数据块**(签名元素):文章头部元信息以 front-matter 形式排布——标签名等宽、固定宽度(约 6em,`flex-shrink: 0`),值内联同行;如 `date: 2025-03-15` / `tags: [随笔, 个人]` / `series: [博客改造日志] 第 1 / 3 篇` / `words: 299` / `time: 1 min` / `rev: 7cfaf82`
+- **YAML 元数据块**(签名元素):文章头部元信息以 front-matter 形式排布——标签名等宽、固定宽度(约 6em,`flex-shrink: 0`),值内联同行;如 `date: 2025-03-15` / `tags: [随笔]` / `series: [博客改造日志] 第 1 / 3 篇` / `words: 299` / `time: 1 min` / `rev: 7cfaf82`
+- **标签白名单**:文章 tags 只允许使用 `src/data/tags.ts` 中登记的值,构建期校验,清单外直接报错;新增标签先登记再使用,同义就近归并,每篇 2~3 个
 - **正文**:18px 桌面 / 16px 移动,行高 1.75,measure 约 68 字符
 - **代码**:JetBrains Mono,明暗主题下均置于深色 `paper-2` 背景
 

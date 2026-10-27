@@ -2,6 +2,7 @@ import path from 'node:path'
 import { readdirSync, readFileSync } from 'node:fs'
 import type { Plugin } from 'vite'
 import { parseFrontMatter } from '../src/lib/frontMatter'
+import { TAG_WHITELIST } from '../src/data/tags'
 import type { TocItem } from '../src/lib/toc'
 import { renderMarkdown } from './markdown'
 
@@ -46,6 +47,13 @@ export function loadPosts(): BuiltPost[] {
       continue
     }
     const content = body.trim()
+    const tags = Array.isArray(data.tags) ? data.tags.map(String) : []
+    const unknown = tags.filter((t) => !(TAG_WHITELIST as readonly string[]).includes(t))
+    if (unknown.length > 0) {
+      throw new Error(
+        `[content] ${name}: 未登记的标签 ${unknown.map((t) => `"${t}"`).join(', ')}——请先在 src/data/tags.ts 白名单中登记,或归并到已有标签`,
+      )
+    }
     const created = toIso(String(data.createdAt || ''))
     const createdAt = created ?? EPOCH
     posts.push({
@@ -53,7 +61,7 @@ export function loadPosts(): BuiltPost[] {
       slug: String(data.slug || file),
       title,
       excerpt: String(data.excerpt || ''),
-      tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
+      tags,
       createdAt,
       updatedAt: toIso(String(data.updatedAt || '')) ?? createdAt,
       hasDate: created !== null,

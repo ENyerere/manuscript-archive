@@ -2,7 +2,7 @@
 title: 功能迭代记:搜索、RSS 与系列
 slug: blog-feature-iteration
 excerpt: 博客改造日志其三。这一轮给手稿档案补上了站内搜索、RSS 订阅和系列专题,还顺手修了一个 1px 细线的渲染顽疾。
-tags: [博客, 功能, 前端]
+tags: [博客, 前端]
 series: 博客改造日志
 createdAt: 2026-07-21
 ---

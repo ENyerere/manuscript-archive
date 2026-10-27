@@ -2,7 +2,7 @@
 title: React 重构笔记
 slug: react-refactor-notes
 excerpt: 将静态页面重构为 React 组件化结构的过程笔记,涵盖组件拆分、TypeScript 类型约束与 Zustand 状态管理等核心思路。
-tags: [React, TypeScript, 前端]
+tags: [React, 前端]
 series: 博客改造日志
 createdAt: 2025-02-20
 ---
