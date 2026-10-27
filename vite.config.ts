@@ -256,11 +256,7 @@ function seoPlugin(): Plugin {
         { tag: 'meta', attrs: { property: 'og:title', content: `${SITE_TITLE} · ${SITE_DESC}` }, injectTo: 'head' },
         { tag: 'meta', attrs: { property: 'og:description', content: SEO_DESC }, injectTo: 'head' },
         { tag: 'meta', attrs: { property: 'og:url', content: `${SITE_URL}/` }, injectTo: 'head' },
-        { tag: 'meta', attrs: { property: 'og:image', content: `${SITE_URL}/og-cover.png` }, injectTo: 'head' },
-        { tag: 'meta', attrs: { property: 'og:image:width', content: '1200' }, injectTo: 'head' },
-        { tag: 'meta', attrs: { property: 'og:image:height', content: '630' }, injectTo: 'head' },
-        { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' }, injectTo: 'head' },
-        { tag: 'meta', attrs: { name: 'twitter:image', content: `${SITE_URL}/og-cover.png` }, injectTo: 'head' },
+        { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary' }, injectTo: 'head' },
         { tag: 'meta', attrs: { name: 'twitter:title', content: `${SITE_TITLE} · ${SITE_DESC}` }, injectTo: 'head' },
         { tag: 'meta', attrs: { name: 'twitter:description', content: SEO_DESC }, injectTo: 'head' },
       ]
