@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { TocItem } from '@/lib/toc'
 
 interface TableOfContentsProps {
@@ -13,6 +13,9 @@ interface TableOfContentsProps {
  */
 export default function TableOfContents({ items }: TableOfContentsProps) {
   const [activeId, setActiveId] = useState<string>(items[0]?.id ?? '')
+  // 点击目录跳转期间锁定高亮:平滑滚动会途经中间标题,observer 不能把高亮抢走
+  const lockRef = useRef(false)
+  const unlockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     const headings = items
@@ -22,6 +25,7 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
 
     const observer = new IntersectionObserver(
       (entries) => {
+        if (lockRef.current) return
         entries.forEach((entry) => {
           if (entry.isIntersecting) setActiveId(entry.target.id)
         })
@@ -30,7 +34,22 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
       { rootMargin: '-96px 0px -66% 0px', threshold: 0 }
     )
     headings.forEach((el) => observer.observe(el))
-    return () => observer.disconnect()
+
+    // 滚动停止 150ms 后解锁(平滑滚动持续触发 scroll,天然防抖)
+    const onScroll = () => {
+      if (!lockRef.current) return
+      if (unlockTimerRef.current) clearTimeout(unlockTimerRef.current)
+      unlockTimerRef.current = setTimeout(() => {
+        lockRef.current = false
+      }, 150)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('scroll', onScroll)
+      if (unlockTimerRef.current) clearTimeout(unlockTimerRef.current)
+    }
   }, [items])
 
   if (items.length === 0) return null
@@ -40,8 +59,16 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
     const target = document.getElementById(id)
     if (!target) return
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    lockRef.current = true
+    // 兜底:若目标已在视口内(无滚动事件),1s 后自动解锁
+    if (unlockTimerRef.current) clearTimeout(unlockTimerRef.current)
+    unlockTimerRef.current = setTimeout(() => {
+      lockRef.current = false
+    }, 1000)
     target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
     setActiveId(id)
+    // 瞬时跳转不产生连续滚动事件,直接解锁
+    if (reduced) lockRef.current = false
     window.history.replaceState(null, '', `#${id}`)
   }
 
