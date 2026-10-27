@@ -9,18 +9,14 @@
 	<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0a0a">
 	<title>小峄热心市民</title>
 
-	<!-- 图标库（非阻塞加载，避免阻塞首屏渲染） -->
-	<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" onload="this.rel='stylesheet'">
-	<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"></noscript>
-
-	<!-- favicon图标(绝对地址:SPA 深链接下根相对路径会解析错误) -->
-	<link rel="apple-touch-icon" sizes="180x180" href="https://enyerere.github.io/manuscript-archive/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="https://enyerere.github.io/manuscript-archive/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="https://enyerere.github.io/manuscript-archive/favicon-16x16.png">
-	<link rel="manifest" href="https://enyerere.github.io/manuscript-archive/site.webmanifest">
+	<!-- favicon 图标:%BASE_URL% 构建期替换为部署根路径(/ 或 /manuscript-archive/),深链接下也能正确解析 -->
+	<link rel="apple-touch-icon" sizes="180x180" href="%BASE_URL%apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="%BASE_URL%favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="%BASE_URL%favicon-16x16.png">
+	<link rel="manifest" href="%BASE_URL%site.webmanifest">
 
 	<!-- RSS 自动发现(构建期生成 feed.xml) -->
-	<link rel="alternate" type="application/rss+xml" title="小峄热心市民 · RSS" href="https://enyerere.github.io/manuscript-archive/feed.xml">
+	<link rel="alternate" type="application/rss+xml" title="小峄热心市民 · RSS" href="%BASE_URL%feed.xml">
 
 	<!--
 		SPA 深链接回退解码(与 public/404.html 配套):

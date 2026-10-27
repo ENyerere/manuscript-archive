@@ -2,11 +2,13 @@ import { useParams, Link } from 'react-router-dom'
 import { usePostStore, getPostsByTag } from '@/store/postStore'
 import PostList from '@/components/post/PostList'
 import { ArrowLeft } from 'lucide-react'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export default function TagPage() {
   const { tag } = useParams<{ tag: string }>()
   const posts = usePostStore((state) => state.posts)
   const filtered = tag ? getPostsByTag(posts, tag) : []
+  useDocumentTitle(`#${tag ?? ''}`)
 
   return (
     <div className="py-4 md:py-6 pb-8">

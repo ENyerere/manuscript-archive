@@ -25,13 +25,23 @@ cat > /etc/caddy/Caddyfile <<'EOF'
     root * /var/www/blog
     encode gzip zstd
 
-    # SPA 路由回退:前端路由路径都回退到 index.html
-    try_files {path} /index.html
+    # 构建期为文章/标签等路由预生成了 {path}.html;其余前端路由回退到 index.html
+    # {path}.html 必须在前:/tags 同时存在 tags.html 与 tags/ 目录
+    try_files {path}.html {path} /index.html
     file_server
 
-    # Vite 构建产物带内容哈希,可安全长缓存
+    # Vite 构建产物带内容哈希,可安全长缓存;其余文件(html/feed/sitemap)每次协商,避免部署后拿到旧入口
     @hashed path /assets/*
     header @hashed Cache-Control "public, max-age=31536000, immutable"
+    @unhashed not path /assets/*
+    header @unhashed Cache-Control "no-cache"
+
+    header {
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        X-Frame-Options "SAMEORIGIN"
+        -Server
+    }
 }
 EOF
 

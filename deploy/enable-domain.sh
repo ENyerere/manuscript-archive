@@ -32,13 +32,24 @@ yshenyi.ink {
     root * /var/www/blog
     encode gzip zstd
 
-    # SPA 路由回退
-    try_files {path} /index.html
+    # 构建期为文章/标签等路由预生成了 {path}.html;其余前端路由回退到 index.html
+    # {path}.html 必须在前:/tags 同时存在 tags.html 与 tags/ 目录
+    try_files {path}.html {path} /index.html
     file_server
 
-    # 带哈希构建产物长缓存
+    # 带哈希构建产物长缓存;其余文件每次协商
     @hashed path /assets/*
     header @hashed Cache-Control "public, max-age=31536000, immutable"
+    @unhashed not path /assets/*
+    header @unhashed Cache-Control "no-cache"
+
+    header {
+        Strict-Transport-Security "max-age=31536000"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        X-Frame-Options "SAMEORIGIN"
+        -Server
+    }
 }
 EOF
 

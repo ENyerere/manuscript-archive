@@ -146,7 +146,7 @@ brand
 
 ## Components & Conventions
 
-- **基础组件**:继续使用 shadcn/ui(Button/NavigationMenu 等),但皮肤重写:无圆角(或小至 2px)、无阴影、hairline 边框、单色;未使用的组件(badge/card/separator/sheet)已从仓库移除,不留死代码
+- **基础组件**:继续使用 shadcn/ui(Button 等),但皮肤重写:无圆角(或小至 2px)、无阴影、hairline 边框、单色;未使用的组件(badge/card/separator/sheet/navigation-menu)已从仓库移除,不留死代码——桌面导航只有 4 个平级链接,用语义化 `<nav>` 即可
 - **过滤器约定**(标签/分类):文字按钮,激活态用 bracket 包裹——`> 前端 <`(`::before`/`::after` 注入),非激活为纯文字;不用 Badge 色块
 - **检索条**(首页):hairline 底线输入,mono 字体;检索标题/摘要/标签/正文,与标签过滤叠加,未命中条目衰减;`/` 聚焦、`Esc` 清空
 - **系列约定**:front matter `series` 字段;文章页元数据块 `series: [名] 第 N / M 篇`;合集页 `/series/:name` 按时间正序;首页条目元信息行标注「系列名 · 其一/其二」;前后篇导航系列内优先、边界退回全站
@@ -182,9 +182,11 @@ brand
 ## Deployment
 
 - **托管**:GitHub Pages,https://enyerere.github.io/manuscript-archive/ ;push main 经 GitHub Actions 自动构建部署(`.github/workflows/deploy.yml`)
-- **子路径**:Pages 构建注入 `VITE_BASE=/manuscript-archive/`;本地预览保持根路径。`index.html` 中的静态资源引用(favicon、manifest、feed)一律用绝对地址——SPA 深链接下根相对路径会解析错误
-- **SPA 深链接**:`public/404.html` 编码 + `index.html` 解码脚本回退
-- **构建期注入**:文章 git 版本(virtual:post-revisions,checkout 需 `fetch-depth: 0`)、`dist/feed.xml`(RSS 2.0,最新 20 篇已发布文章)、GitHub 活数据(virtual:github-projects / virtual:github-languages,API 失败降级为配置信息,构建不中断)
+- **子路径**:Pages 构建注入 `VITE_BASE=/manuscript-archive/`;本地预览保持根路径。`index.html` 中的静态资源引用(favicon、manifest、feed)一律用 `%BASE_URL%` 前缀(构建期替换为部署根路径)——不写死 github.io 绝对地址,否则自有服务器主站会跨域回源到镜像;运行时资源用 `import.meta.env.BASE_URL` 或 `import` 引入
+- **按路由静态页**:构建期为文章/标签/系列/归档/关于生成 `posts/<slug>.html` 等扁平文件(独立 title、description、OG、canonical,`<noscript>` 内含正文或文章列表),Pages 与 Caddy(`try_files {path}.html`)直接命中;不做 SSR 注水,加载后仍由 SPA 接管
+- **SPA 深链接兜底**:`public/404.html` 编码 + `index.html` 解码脚本回退;`pathSegmentsToKeep` 构建期按 base 段数自动改写;路由 `basename` 取 `BASE_URL`
+- **正文管线**:Markdown 在构建期渲染为 HTML(`build/markdown.ts`,含代码高亮与标题锚点),客户端不再携带 Markdown 解析器;正文按篇拆 chunk,检索正文索引首次检索时才下载
+- **构建期注入**:文章 git 版本(virtual:post-revisions,checkout 需 `fetch-depth: 0`)、`dist/feed.xml`(RSS 2.0,最新 20 篇已发布文章,`content:encoded` 输出全文)、GitHub 活数据(virtual:github-projects / virtual:github-languages,API 失败降级为配置信息,构建不中断)
 - **定时重建**:每周一 03:17 UTC 触发,刷新关于页的 GitHub 项目与语言数据,无需 push 代码
 
 ### 关于页 GitHub 数据约定

@@ -25,7 +25,7 @@ export default function PostCard({ post, index, dimmed = false }: PostCardProps)
   const posts = usePostStore((state) => state.posts)
   const series = getSeriesInfo(posts, post)
   const date = post.createdAt.slice(0, 10)
-  const wordCount = post.content.replace(/\s+/g, '').length
+  const wordCount = post.wordCount
   const readTime = Math.max(1, Math.ceil(wordCount / 300))
 
   return (

@@ -2,9 +2,10 @@ import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { execSync } from 'node:child_process'
-import { readdirSync, readFileSync } from 'node:fs'
-import { parseFrontMatter } from './src/lib/frontMatter'
+import { readdirSync } from 'node:fs'
 import { projectConfigs, type Project } from './src/data/projects'
+import { postsPlugin, getPosts, publishedPosts, POSTS_DIR } from './build/posts'
+import { staticPagesPlugin } from './build/staticPages'
 
 /**
  * F4 版本历史:构建期为每篇文章取 git 短 hash 与修订次数,
@@ -43,8 +44,7 @@ function postRevisionsPlugin(): Plugin {
       try {
         repoUrl = normalizeRepoUrl(git('config --get remote.origin.url'))
         branch = git('rev-parse --abbrev-ref HEAD') || 'main'
-        const postsDir = path.resolve(__dirname, 'src/content/posts')
-        for (const file of readdirSync(postsDir)) {
+        for (const file of readdirSync(POSTS_DIR)) {
           if (!file.endsWith('.md')) continue
           const rel = `src/content/posts/${file}`
           try {
@@ -85,27 +85,17 @@ function xmlEscape(s: string): string {
     .replace(/'/g, '&apos;')
 }
 
+/** RSS 全文:根相对链接改写为绝对地址(阅读器里没有站点上下文);]]> 拆开避免提前闭合 CDATA */
+function feedHtml(html: string): string {
+  const absolute = html.replace(/(href|src)="\/(?!\/)/g, `$1="${SITE_URL}/`)
+  return `<![CDATA[${absolute.replace(/]]>/g, ']]]]><![CDATA[>')}]]>`
+}
+
 function rssFeedPlugin(): Plugin {
   return {
     name: 'rss-feed',
     generateBundle() {
-      const postsDir = path.resolve(__dirname, 'src/content/posts')
-      const items = readdirSync(postsDir)
-        .filter((f) => f.endsWith('.md'))
-        .map((f) => {
-          const { data } = parseFrontMatter(readFileSync(path.join(postsDir, f), 'utf-8'))
-          return {
-            slug: String(data.slug || f.replace(/\.md$/, '')),
-            title: String(data.title || ''),
-            excerpt: String(data.excerpt || ''),
-            tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
-            date: new Date(String(data.createdAt || '')),
-            published: data.published !== false,
-          }
-        })
-        .filter((p) => p.published && p.title && !Number.isNaN(p.date.getTime()))
-        .sort((a, b) => b.date.getTime() - a.date.getTime())
-        .slice(0, 20)
+      const items = publishedPosts(getPosts()).slice(0, 20)
 
       const itemXml = items
         .map((p) => {
@@ -115,15 +105,16 @@ function rssFeedPlugin(): Plugin {
       <title>${xmlEscape(p.title)}</title>
       <link>${link}</link>
       <guid isPermaLink="true">${link}</guid>
-      <pubDate>${p.date.toUTCString()}</pubDate>
-      <description>${xmlEscape(p.excerpt)}</description>${cats ? `\n${cats}` : ''}
+      <pubDate>${new Date(p.createdAt).toUTCString()}</pubDate>
+      <description>${xmlEscape(p.excerpt)}</description>
+      <content:encoded>${feedHtml(p.html)}</content:encoded>${cats ? `\n${cats}` : ''}
     </item>`
         })
         .join('\n')
 
       const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/rss.xsl"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<?xml-stylesheet type="text/xsl" href="rss.xsl"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>${xmlEscape(SITE_TITLE)}</title>
     <link>${SITE_URL}/</link>
@@ -251,8 +242,8 @@ function githubDataPlugin(): Plugin {
 }
 
 /**
- * SEO:构建期生成 sitemap.xml,并向 index.html 注入 OG/Twitter meta。
- * 注意:SPA 壳全站共用一套站点级 meta;文章级 OG 需逐路由预渲染,当前未做。
+ * SEO:构建期生成 sitemap.xml,并向 index.html 注入站点级 OG/Twitter meta。
+ * 文章/标签等页面的 meta 由 staticPagesPlugin 以此为模板逐路由替换。
  */
 function seoPlugin(): Plugin {
   return {
@@ -271,20 +262,7 @@ function seoPlugin(): Plugin {
       ]
     },
     generateBundle() {
-      const postsDir = path.resolve(__dirname, 'src/content/posts')
-      const posts = readdirSync(postsDir)
-        .filter((f) => f.endsWith('.md'))
-        .map((f) => {
-          const { data } = parseFrontMatter(readFileSync(path.join(postsDir, f), 'utf-8'))
-          return {
-            slug: String(data.slug || f.replace(/\.md$/, '')),
-            tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
-            series: data.series ? String(data.series) : null,
-            published: data.published !== false,
-            lastmod: String(data.updatedAt || data.createdAt || '').slice(0, 10),
-          }
-        })
-        .filter((p) => p.published && !Number.isNaN(new Date(p.lastmod).getTime()))
+      const posts = publishedPosts(getPosts()).map((p) => ({ ...p, lastmod: p.updatedAt.slice(0, 10) }))
 
       const urls: { loc: string; lastmod?: string }[] = [
         { loc: '/' },
@@ -319,7 +297,15 @@ ${urls
 export default defineConfig({
   // GitHub Pages 部署在 /manuscript-archive/ 子路径;本地预览保持根路径
   base: process.env.VITE_BASE ?? '/',
-  plugins: [react(), postRevisionsPlugin(), rssFeedPlugin(), githubDataPlugin(), seoPlugin()],
+  plugins: [
+    react(),
+    postsPlugin(),
+    postRevisionsPlugin(),
+    rssFeedPlugin(),
+    githubDataPlugin(),
+    seoPlugin(),
+    staticPagesPlugin({ url: SITE_URL, title: SITE_TITLE, description: SEO_DESC }),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

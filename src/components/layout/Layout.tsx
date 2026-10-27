@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, ScrollRestoration } from 'react-router-dom'
 import Header from './Header'
 import Footer from './Footer'
 import ScrollProgress from './ScrollProgress'
@@ -20,6 +20,8 @@ export default function Layout() {
 
       <Footer />
       <BackToTop visible={backToTopVisible} onClick={scrollToTop} />
+      {/* 新导航回到顶部,前进/后退恢复原滚动位置 */}
+      <ScrollRestoration />
     </div>
   )
 }

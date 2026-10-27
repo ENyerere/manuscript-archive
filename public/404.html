@@ -10,10 +10,9 @@
 		query string 并重定向回 index.html,由其中的解码脚本还原路由。
 		参考:https://github.com/rafgraph/spa-github-pages
 
-		注意:pathSegmentsToKeep = 0 适用于自定义域名或
-		<username>.github.io 根路径部署。若部署到项目页
-		(<username>.github.io/easy-web/),请改为 1,
-		并同步设置 vite.config.ts 的 base = '/easy-web/'。
+		pathSegmentsToKeep 由构建期按 VITE_BASE 的段数自动改写(build/staticPages.ts):
+		根路径部署为 0,项目页 /manuscript-archive/ 为 1。
+		文章/标签/系列等路由已预生成静态 HTML,通常不会落到本页。
 	-->
 	<script type="text/javascript">
 		var pathSegmentsToKeep = 0;

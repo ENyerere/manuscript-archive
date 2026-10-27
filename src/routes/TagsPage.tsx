@@ -1,7 +1,9 @@
 import { usePostStore, getAllTags } from '@/store/postStore'
 import TagCloud from '@/components/post/TagCloud'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export default function TagsPage() {
+  useDocumentTitle('标签')
   const posts = usePostStore((state) => state.posts)
   const tags = getAllTags(posts)
 

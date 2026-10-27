@@ -3,18 +3,23 @@ import { fallbackLanguages, disciplines } from '@/data/skills'
 import projects from 'virtual:github-projects'
 import languages from 'virtual:github-languages'
 import { socials } from '@/data/socials'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 /**
  * 关于页:单栏阅读宽度,hairline 分节,无卡片。
  * 节标题用等宽小标签,内容用正文系统。
  */
 export default function AboutPage() {
+  useDocumentTitle('关于')
   return (
     <div className="py-10 md:py-16 max-w-[42rem]">
       {/* 个人档案 */}
       <header className="mb-12">
         <img
-          src={profile.avatar}
+          src={profile.avatar.src}
+          srcSet={profile.avatar.srcSet}
+          width={64}
+          height={64}
           alt={profile.name}
           className="w-16 h-16 rounded-sm object-cover mb-6"
         />

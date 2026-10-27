@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export default function NotFoundPage() {
+  useDocumentTitle('页面不存在')
   return (
     <div className="py-24">
       <p className="font-mono text-xs text-muted-foreground tracking-[0.08em] mb-4">404</p>

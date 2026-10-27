@@ -1,11 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import {
-  NavigationMenu,
-  NavigationMenuList,
-  NavigationMenuItem,
-  NavigationMenuLink,
-} from '@/components/ui/navigation-menu'
 import { Button } from '@/components/ui/button'
 import { Menu, X } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
@@ -81,27 +75,25 @@ export default function Header() {
         </Link>
 
         {/* 桌面端导航:激活态 = 墨色 + 下划线,非激活 = 静音 */}
-        <NavigationMenu className="hidden md:flex">
-          <NavigationMenuList className="gap-6">
+        <nav aria-label="主导航" className="hidden md:block">
+          <ul className="flex items-center gap-6">
             {navItems.map((item) => (
-              <NavigationMenuItem key={item.to}>
-                <NavigationMenuLink asChild>
-                  <Link
-                    to={item.to}
-                    aria-current={isActive(item.to) ? 'page' : undefined}
-                    className={`text-sm transition-colors underline-offset-4 ${
-                      isActive(item.to)
-                        ? 'text-foreground font-medium underline'
-                        : 'text-muted-foreground hover:text-foreground hover:underline'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
+              <li key={item.to}>
+                <Link
+                  to={item.to}
+                  aria-current={isActive(item.to) ? 'page' : undefined}
+                  className={`text-sm transition-colors underline-offset-4 ${
+                    isActive(item.to)
+                      ? 'text-foreground font-medium underline'
+                      : 'text-muted-foreground hover:text-foreground hover:underline'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              </li>
             ))}
-          </NavigationMenuList>
-        </NavigationMenu>
+          </ul>
+        </nav>
 
         <div className="flex items-center gap-1">
           <ThemeToggle />

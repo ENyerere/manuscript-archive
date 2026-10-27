@@ -1,35 +1,46 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePostStore, getPosts, getAllTags } from '@/store/postStore'
 import type { Post } from '@/store/postStore'
+import { loadSearchIndex } from '@/content/posts'
 import PostList from '@/components/post/PostList'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
-/** 大小写不敏感地检索标题、摘要、标签与正文 */
-function matchesQuery(post: Post, query: string): boolean {
-  const q = query.toLowerCase()
-  return (
-    post.title.toLowerCase().includes(q) ||
-    post.excerpt.toLowerCase().includes(q) ||
-    post.content.toLowerCase().includes(q) ||
-    post.tags.some((tag) => tag.toLowerCase().includes(q))
-  )
+/** 标题、摘要、标签的小写拼接;正文文本由检索索引按需补充 */
+function metaText(post: Post): string {
+  return [post.title, post.excerpt, ...post.tags].join('\n').toLowerCase()
 }
 
 export default function HomePage() {
+  useDocumentTitle()
   const posts = usePostStore((state) => state.posts)
-  const sortedPosts = getPosts(posts)
-  const tags = getAllTags(posts)
+  const sortedPosts = useMemo(() => getPosts(posts), [posts])
+  const tags = useMemo(() => getAllTags(posts), [posts])
   // null = 全部
   const [activeTag, setActiveTag] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)
+  // 正文检索索引:首次聚焦或输入时才下载;就绪前只检索标题/摘要/标签
+  const [bodyIndex, setBodyIndex] = useState<Record<string, string> | null>(null)
+  const indexRequested = useRef(false)
+  const requestIndex = () => {
+    if (indexRequested.current) return
+    indexRequested.current = true
+    void loadSearchIndex().then(setBodyIndex)
+  }
 
   const trimmedQuery = query.trim()
   const searching = trimmedQuery.length > 0
 
-  const hitCount = useMemo(
-    () => (searching ? sortedPosts.filter((p) => matchesQuery(p, trimmedQuery)).length : 0),
-    [sortedPosts, searching, trimmedQuery],
+  const haystacks = useMemo(
+    () => new Map(sortedPosts.map((p) => [p.slug, `${metaText(p)}\n${bodyIndex?.[p.slug] ?? ''}`])),
+    [sortedPosts, bodyIndex],
   )
+  const hits = useMemo(() => {
+    if (!searching) return null
+    const q = trimmedQuery.toLowerCase()
+    return new Set(sortedPosts.filter((p) => haystacks.get(p.slug)?.includes(q)).map((p) => p.slug))
+  }, [sortedPosts, haystacks, searching, trimmedQuery])
+  const hitCount = hits?.size ?? 0
 
   // 「/」聚焦检索条;Esc 清空并失焦
   useEffect(() => {
@@ -53,7 +64,7 @@ export default function HomePage() {
   // 标签与检索叠加:任一条件未命中即衰减
   const isDimmed = (post: Post): boolean => {
     if (activeTag && !post.tags.includes(activeTag)) return true
-    if (searching && !matchesQuery(post, trimmedQuery)) return true
+    if (hits && !hits.has(post.slug)) return true
     return false
   }
 
@@ -76,7 +87,11 @@ export default function HomePage() {
             ref={searchRef}
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onFocus={requestIndex}
+            onChange={(e) => {
+              requestIndex()
+              setQuery(e.target.value)
+            }}
             placeholder="标题 / 摘要 / 标签 / 正文"
             autoComplete="off"
             className="w-full max-w-sm bg-transparent font-mono text-sm text-foreground placeholder:text-muted-foreground/60 border-b border-border focus:border-foreground outline-none transition-colors pb-1"

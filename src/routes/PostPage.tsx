@@ -1,20 +1,22 @@
-import { useMemo } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, useLoaderData, Link } from 'react-router-dom'
+import type { PostBody } from 'virtual:posts'
 import { usePostStore, getPostBySlug, getPosts, getSeriesPosts } from '@/store/postStore'
 import PostContent from '@/components/post/PostContent'
 import TableOfContents from '@/components/post/TableOfContents'
 import LineReveal from '@/components/LineReveal'
-import { extractHeadings } from '@/lib/toc'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export default function PostPage() {
   const { slug } = useParams<{ slug: string }>()
+  // 路由 loader 预先加载的正文;未发布或不存在时为 null
+  const body = useLoaderData() as PostBody | null
   const posts = usePostStore((state) => state.posts)
   const post = slug ? getPostBySlug(posts, slug) : undefined
-  // hooks 必须在提前 return 之前调用
-  const tocItems = useMemo(() => (post ? extractHeadings(post.content) : []), [post])
+  const tocItems = body?.headings ?? []
+  useDocumentTitle(post && body ? post.title : '文章不存在')
 
-  if (!post) {
+  if (!post || !body) {
     return (
       <div className="py-24">
         <p className="font-mono text-xs text-muted-foreground tracking-[0.08em] mb-4">404</p>
@@ -42,7 +44,7 @@ export default function PostPage() {
     seriesIndex !== -1 && seriesIndex < seriesList.length - 1
       ? seriesList[seriesIndex + 1]
       : globalNewer
-  const wordCount = post.content.replace(/\s+/g, '').length
+  const wordCount = post.wordCount
   const readTime = Math.max(1, Math.ceil(wordCount / 300))
 
   return (
@@ -137,7 +139,7 @@ export default function PostPage() {
 
           {/* hairline 后的正文 */}
           <div className="border-t border-border pt-2">
-            <PostContent content={post.content} />
+            <PostContent html={body.html} />
           </div>
         </article>
 

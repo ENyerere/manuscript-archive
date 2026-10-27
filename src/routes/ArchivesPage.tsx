@@ -1,7 +1,9 @@
 import { usePostStore, getArchives } from '@/store/postStore'
 import ArchiveTimeline from '@/components/post/ArchiveTimeline'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export default function ArchivesPage() {
+  useDocumentTitle('归档')
   const posts = usePostStore((state) => state.posts)
   const archives = getArchives(posts)
   const total = archives.reduce((sum, g) => sum + g.posts.length, 0)

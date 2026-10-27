@@ -6,7 +6,8 @@ export interface Post {
   title: string
   slug: string
   excerpt: string
-  content: string // Markdown 字符串(不含 front matter)
+  /** 正文字数(去空白后的字符数,构建期统计);正文 HTML 由 loadPostBody 按需加载 */
+  wordCount: number
   tags: string[]
   createdAt: string // ISO 8601 字符串
   updatedAt: string // ISO 8601 字符串
