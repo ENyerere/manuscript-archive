@@ -173,7 +173,8 @@ export default function PostPage() {
       {/* 右栏:TOC 目录(xl 断点显示——覆盖笔记本宽度,sticky 定位) */}
       {tocItems.length > 0 && (
         <aside className="hidden xl:block xl:col-start-3">
-          <div className="sticky top-20">
+          {/* sticky 偏移 = 头部 64px + 容器 py-6 24px,与自然位置一致,滚动开始时零位移 */}
+          <div className="sticky top-[88px]">
             <TableOfContents items={tocItems} />
           </div>
         </aside>
