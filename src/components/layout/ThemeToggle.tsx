@@ -84,7 +84,13 @@ export default function ThemeToggle() {
   }
 
   return (
-    <Button variant="ghost" size="icon" onClick={handleToggle} aria-label="切换主题">
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={handleToggle}
+      aria-pressed={isDark}
+      aria-label={isDark ? '深色主题' : '浅色主题'}
+    >
       {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
     </Button>
   )

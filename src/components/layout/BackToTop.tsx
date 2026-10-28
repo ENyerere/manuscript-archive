@@ -1,22 +1,24 @@
 import { ArrowUp } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 
 interface BackToTopProps {
   visible: boolean
   onClick: () => void
 }
 
+/** 回到顶部:纸面底 + hairline 边框的方形按钮,无阴影;常驻 DOM,以透明度淡入淡出 */
 export default function BackToTop({ visible, onClick }: BackToTopProps) {
-  if (!visible) return null
   return (
-    <Button
-      variant="default"
-      size="icon"
+    <button
+      type="button"
       onClick={onClick}
-      className="fixed bottom-6 right-6 z-40 h-10 w-10 rounded-full shadow-md opacity-90 hover:opacity-100"
       aria-label="回到顶部"
+      aria-hidden={!visible}
+      tabIndex={visible ? 0 : -1}
+      className={`fixed bottom-6 right-6 z-40 flex h-10 w-10 items-center justify-center rounded-sm border border-border bg-background text-muted-foreground transition-[opacity,color,border-color] duration-300 hover:text-foreground hover:border-foreground focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-foreground ${
+        visible ? 'opacity-100' : 'pointer-events-none opacity-0'
+      }`}
     >
       <ArrowUp className="h-4 w-4" />
-    </Button>
+    </button>
   )
 }

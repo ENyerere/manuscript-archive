@@ -10,7 +10,8 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 export default function SeriesPage() {
   const { name } = useParams<{ name: string }>()
   const posts = usePostStore((state) => state.posts)
-  const seriesName = name ? decodeURIComponent(name) : ''
+  // useParams 已解码;再 decodeURIComponent 会让含 % 的系列名报错
+  const seriesName = name ?? ''
   const seriesPosts = seriesName ? getSeriesPosts(posts, seriesName) : []
   useDocumentTitle(seriesPosts.length > 0 ? `系列:${seriesName}` : '系列不存在')
 

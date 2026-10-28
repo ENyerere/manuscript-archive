@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Layout from '@/components/layout/Layout'
 import HomePage from '@/routes/HomePage'
 import { loadPostBody } from '@/content/posts'
+import RouteError from '@/routes/RouteError'
 
 // 路由级代码分割:使用 React Router 的 route.lazy 而非 React.lazy + Suspense。
 // 关键差异:route.lazy 导航期间保留旧页面渲染,模块就绪后再切换,
@@ -20,20 +21,28 @@ const router = createBrowserRouter(
     {
       path: '/',
       element: <Layout />,
+      // Layout 自身出错时的兜底(此时没有页头页脚)
+      errorElement: <RouteError />,
       children: [
-        { index: true, element: <HomePage /> },
         {
-          path: 'posts/:slug',
-          // 正文 chunk 与页面 chunk 并行加载,都就绪后才切换页面(同样不闪屏)
-          loader: ({ params }) => (params.slug ? loadPostBody(params.slug) : null),
-          lazy: lazyRoute(loadPostPage),
+          // 无路径包裹层:页面级错误渲染在 Layout 的 Outlet 内,保留页头页脚
+          errorElement: <RouteError />,
+          children: [
+            { index: true, element: <HomePage /> },
+            {
+              path: 'posts/:slug',
+              // 正文 chunk 与页面 chunk 并行加载,都就绪后才切换页面(同样不闪屏)
+              loader: ({ params }) => (params.slug ? loadPostBody(params.slug) : null),
+              lazy: lazyRoute(loadPostPage),
+            },
+            { path: 'archives', lazy: lazyRoute(() => import('@/routes/ArchivesPage')) },
+            { path: 'tags', lazy: lazyRoute(() => import('@/routes/TagsPage')) },
+            { path: 'tags/:tag', lazy: lazyRoute(() => import('@/routes/TagPage')) },
+            { path: 'series/:name', lazy: lazyRoute(() => import('@/routes/SeriesPage')) },
+            { path: 'about', lazy: lazyRoute(() => import('@/routes/AboutPage')) },
+            { path: '*', lazy: lazyRoute(() => import('@/routes/NotFoundPage')) },
+          ],
         },
-        { path: 'archives', lazy: lazyRoute(() => import('@/routes/ArchivesPage')) },
-        { path: 'tags', lazy: lazyRoute(() => import('@/routes/TagsPage')) },
-        { path: 'tags/:tag', lazy: lazyRoute(() => import('@/routes/TagPage')) },
-        { path: 'series/:name', lazy: lazyRoute(() => import('@/routes/SeriesPage')) },
-        { path: 'about', lazy: lazyRoute(() => import('@/routes/AboutPage')) },
-        { path: '*', lazy: lazyRoute(() => import('@/routes/NotFoundPage')) },
       ],
     },
   ],

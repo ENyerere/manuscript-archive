@@ -9,6 +9,17 @@
 	<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0a0a">
 	<title>小峄热心市民</title>
 
+	<!-- 主题首帧同步:在样式与 React 之前加 dark class,避免深色用户首屏闪白(读写约定与 useTheme 一致) -->
+	<script>
+		(function () {
+			try {
+				var stored = localStorage.getItem('theme');
+				var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+				if (dark) document.documentElement.classList.add('dark');
+			} catch (e) {}
+		})();
+	</script>
+
 	<!-- favicon 图标:%BASE_URL% 构建期替换为部署根路径(/ 或 /manuscript-archive/),深链接下也能正确解析 -->
 	<link rel="apple-touch-icon" sizes="180x180" href="%BASE_URL%apple-touch-icon.png">
 	<link rel="icon" type="image/png" sizes="32x32" href="%BASE_URL%favicon-32x32.png">

@@ -19,6 +19,9 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [menuVisible, setMenuVisible] = useState(false)
   const closeTimer = useRef<number | null>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
 
   // 关闭:先播 300ms 淡出(可见性置 false),动画结束后再卸载
   const closeMenu = () => {
@@ -48,17 +51,37 @@ export default function Header() {
     }
     const raf = requestAnimationFrame(() => setMenuVisible(true))
     document.body.style.overflow = 'hidden'
+    // 焦点移入对话框;卸载时还给汉堡按钮
+    closeButtonRef.current?.focus()
+    const trigger = triggerRef.current
     return () => {
       cancelAnimationFrame(raf)
       document.body.style.overflow = ''
+      trigger?.focus()
     }
   }, [menuOpen])
 
-  // Esc 关闭
+  // Esc 关闭;Tab 在对话框内循环,不落到背后的页面
   useEffect(() => {
     if (!menuOpen) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeMenu()
+      if (e.key === 'Escape') {
+        closeMenu()
+        return
+      }
+      if (e.key !== 'Tab' || !dialogRef.current) return
+      const focusable = dialogRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')
+      if (focusable.length === 0) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      const active = document.activeElement
+      if (e.shiftKey && (active === first || !dialogRef.current.contains(active))) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && (active === last || !dialogRef.current.contains(active))) {
+        e.preventDefault()
+        first.focus()
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -99,6 +122,7 @@ export default function Header() {
           <ThemeToggle />
           {/* 移动端:汉堡按钮 → 全屏索引页 */}
           <Button
+            ref={triggerRef}
             variant="ghost"
             size="icon"
             className="md:hidden"
@@ -114,6 +138,7 @@ export default function Header() {
       {/* 移动端全屏导航:整页覆盖的「索引」,大字号序号目录 + hairline 分隔 */}
       {menuOpen && (
         <div
+          ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-label="站点导航"
@@ -127,6 +152,7 @@ export default function Header() {
               索引 / INDEX
             </span>
             <Button
+              ref={closeButtonRef}
               variant="ghost"
               size="icon"
               onClick={closeMenu}
