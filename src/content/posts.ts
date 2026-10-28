@@ -32,6 +32,17 @@ export async function loadPostBody(slug: string): Promise<PostBody | null> {
   return loader ? (await loader()).default : null
 }
 
+const prefetched = new Set<string>()
+
+/** 悬停/聚焦文章链接时预取正文 chunk;浏览器会缓存模块,点击后 loader 直接命中 */
+export function prefetchPost(slug: string): void {
+  const loader = bodies[slug]
+  if (!loader || prefetched.has(slug)) return
+  prefetched.add(slug)
+  // 预取失败不打扰用户,真正点击时由路由 loader 重试并走错误页
+  loader().catch(() => prefetched.delete(slug))
+}
+
 /** 检索用纯文本索引,首次检索时才下载 */
 export async function loadSearchIndex(): Promise<Record<string, string>> {
   return (await import('virtual:post-search')).default

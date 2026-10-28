@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { usePostStore, getPosts, getAllTags } from '@/store/postStore'
 import type { Post } from '@/store/postStore'
 import { loadSearchIndex } from '@/content/posts'
@@ -15,9 +16,26 @@ export default function HomePage() {
   const posts = usePostStore((state) => state.posts)
   const sortedPosts = useMemo(() => getPosts(posts), [posts])
   const tags = useMemo(() => getAllTags(posts), [posts])
-  // null = 全部
-  const [activeTag, setActiveTag] = useState<string | null>(null)
-  const [query, setQuery] = useState('')
+  // 检索词与标签存在 URL(?q=&tag=):返回首页时保留,也可直接分享过滤结果
+  const [searchParams, setSearchParams] = useSearchParams()
+  const query = searchParams.get('q') ?? ''
+  const tagParam = searchParams.get('tag')
+  // URL 里的标签已不存在时视为「全部」
+  const activeTag = tagParam && tags.some((t) => t.tag === tagParam) ? tagParam : null
+  const updateParams = (key: 'q' | 'tag', value: string | null) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        if (value) next.set(key, value)
+        else next.delete(key)
+        return next
+      },
+      // 替换当前记录:不为每次按键新增历史;不触发 ScrollRestoration 回顶
+      { replace: true, preventScrollReset: true },
+    )
+  }
+  const setQuery = (value: string) => updateParams('q', value)
+  const setActiveTag = (tag: string | null) => updateParams('tag', tag)
   const searchRef = useRef<HTMLInputElement>(null)
   // 正文检索索引:首次聚焦或输入时才下载;就绪前只检索标题/摘要/标签
   const [bodyIndex, setBodyIndex] = useState<Record<string, string> | null>(null)
@@ -30,6 +48,11 @@ export default function HomePage() {
 
   const trimmedQuery = query.trim()
   const searching = trimmedQuery.length > 0
+  // 经链接带着 ?q= 进站时也要补上正文检索
+  useEffect(() => {
+    if (searching) requestIndex()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searching])
 
   const haystacks = useMemo(
     () => new Map(sortedPosts.map((p) => [p.slug, `${metaText(p)}\n${bodyIndex?.[p.slug] ?? ''}`])),
@@ -88,10 +111,7 @@ export default function HomePage() {
             type="text"
             value={query}
             onFocus={requestIndex}
-            onChange={(e) => {
-              requestIndex()
-              setQuery(e.target.value)
-            }}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="标题 / 摘要 / 标签 / 正文"
             autoComplete="off"
             className="w-full max-w-sm bg-transparent font-mono text-sm text-foreground placeholder:text-muted-foreground/60 border-b border-border focus:border-foreground outline-none transition-colors pb-1"

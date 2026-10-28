@@ -3,6 +3,8 @@ import type { PostBody } from 'virtual:posts'
 import { usePostStore, getPostBySlug, getPosts, getSeriesPosts } from '@/store/postStore'
 import PostContent from '@/components/post/PostContent'
 import TableOfContents from '@/components/post/TableOfContents'
+import MobileToc from '@/components/post/MobileToc'
+import PostLink from '@/components/post/PostLink'
 import LineReveal from '@/components/LineReveal'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
@@ -62,6 +64,7 @@ export default function PostPage() {
         <article>
           {/* 签名动效:标题逐行揭示 */}
           <LineReveal
+            key={post.slug}
             text={post.title}
             as="h1"
             className="text-3xl md:text-4xl font-bold mb-8"
@@ -80,7 +83,7 @@ export default function PostPage() {
                 {post.tags.map((tag, i) => (
                   <span key={tag}>
                     {i > 0 && ', '}
-                    <Link to={`/tags/${tag}`} className="hover:underline underline-offset-2">
+                    <Link to={`/tags/${encodeURIComponent(tag)}`} className="hover:underline underline-offset-2">
                       {tag}
                     </Link>
                   </span>
@@ -137,6 +140,9 @@ export default function PostPage() {
             )}
           </div>
 
+          {/* 窄屏目录:xl 以上由右栏 TOC 接管 */}
+          <MobileToc items={tocItems} />
+
           {/* hairline 后的正文 */}
           <div className="border-t border-border pt-2">
             <PostContent html={body.html} />
@@ -147,24 +153,24 @@ export default function PostPage() {
         {(olderPost || newerPost) && (
           <nav className="border-t border-border mt-16 pt-6 flex justify-between gap-6 text-sm">
             {olderPost ? (
-              <Link to={`/posts/${olderPost.slug}`} className="group max-w-[45%]">
+              <PostLink slug={olderPost.slug} className="group max-w-[45%]">
                 <span className="font-mono text-xs text-muted-foreground flex items-center gap-1 mb-1.5">
                   <ArrowLeft className="h-3 w-3" />上一篇
                 </span>
                 <span className="group-hover:underline underline-offset-4 line-clamp-2">
                   {olderPost.title}
                 </span>
-              </Link>
+              </PostLink>
             ) : <span />}
             {newerPost ? (
-              <Link to={`/posts/${newerPost.slug}`} className="group max-w-[45%] text-right ml-auto">
+              <PostLink slug={newerPost.slug} className="group max-w-[45%] text-right ml-auto">
                 <span className="font-mono text-xs text-muted-foreground flex items-center justify-end gap-1 mb-1.5">
                   下一篇<ArrowRight className="h-3 w-3" />
                 </span>
                 <span className="group-hover:underline underline-offset-4 line-clamp-2">
                   {newerPost.title}
                 </span>
-              </Link>
+              </PostLink>
             ) : <span />}
           </nav>
         )}

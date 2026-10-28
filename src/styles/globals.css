@@ -160,6 +160,24 @@
   .u-line:hover::after {
     transform: scaleX(1);
   }
+
+  /* 展开/收起(details):自定义 + / × 标记,展开态旋转 45° 成 ×(单色) */
+  .toc-details > summary {
+    list-style: none;
+  }
+  .toc-details > summary::-webkit-details-marker {
+    display: none;
+  }
+  .toc-details > summary::after {
+    content: '+';
+    /* transform 对行内元素无效 */
+    display: inline-block;
+    color: rgb(var(--muted-foreground));
+    transition: transform 0.2s ease;
+  }
+  .toc-details[open] > summary::after {
+    transform: rotate(45deg);
+  }
 }
 
 /* 签名动效:标题逐行揭示(配合 LineReveal 组件)

@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
 import type { Post } from '@/store/postStore'
+import PostLink from './PostLink'
 
 interface ArchiveTimelineProps {
   archives: { year: number; posts: Post[] }[]
@@ -37,12 +37,12 @@ export default function ArchiveTimeline({ archives }: ArchiveTimelineProps) {
                 <span className="font-mono text-sm text-muted-foreground block mb-1 md:mb-0 md:pt-0.5">
                   {post.createdAt.slice(5, 10)}
                 </span>
-                <Link
-                  to={`/posts/${post.slug}`}
+                <PostLink
+                  slug={post.slug}
                   className="font-medium text-foreground hover:underline underline-offset-4"
                 >
                   {post.title}
-                </Link>
+                </PostLink>
               </div>
             ))}
           </div>

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import type { Post } from '@/store/postStore'
 import { usePostStore, getSeriesInfo } from '@/store/postStore'
+import PostLink from './PostLink'
 
 /** 系列序号的中文表述:其一 / 其二 / … */
 const CN_NUMERALS = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
@@ -40,12 +41,12 @@ export default function PostCard({ post, index, dimmed = false }: PostCardProps)
         </div>
 
         <div className="min-w-0">
-          <Link
-            to={`/posts/${post.slug}`}
+          <PostLink
+            slug={post.slug}
             className="block text-xl md:text-2xl font-semibold tracking-[-0.015em] text-foreground hover:underline underline-offset-4 mb-2"
           >
             {post.title}
-          </Link>
+          </PostLink>
 
           <p className="text-muted-foreground leading-7 mb-3 line-clamp-2">{post.excerpt}</p>
 
@@ -55,7 +56,7 @@ export default function PostCard({ post, index, dimmed = false }: PostCardProps)
               {post.tags.map((tag, i) => (
                 <span key={tag}>
                   {i > 0 && ' · '}
-                  <Link to={`/tags/${tag}`} className="hover:text-foreground hover:underline underline-offset-2">
+                  <Link to={`/tags/${encodeURIComponent(tag)}`} className="hover:text-foreground hover:underline underline-offset-2">
                     {tag}
                   </Link>
                 </span>

@@ -7,7 +7,7 @@
  * 分组镜像真实排版,因此宽度不变时重建后的换行与检测完全一致。
  */
 
-const CJK_RE = /[぀-ヿ㐀-䶿一-鿿豈-﫿＀-￯]/
+const CJK_RE = /[぀-ヿ㐀-䶿一-鿿豈-﫿＀-￯]/
 const WORD_CHAR_RE = /[\w-]/
 
 /** 文本 → token 序列(保留空格,便于还原原始换行) */
@@ -37,11 +37,11 @@ export function tokenize(text: string): string[] {
 }
 
 /**
- * 把元素内的纯文本重建为逐行包裹结构。
- * 幂等:对已包裹的节点再次调用会得到相同结果。
+ * 把原始文本重建为逐行包裹结构。
+ * 必须传入原始文本:包裹后行与行之间的空格已被裁掉,不能再从 textContent 还原。
+ * 宽度变化后可重复调用,按新宽度重新分行。
  */
-export function wrapLines(el: HTMLElement): void {
-  const text = el.textContent ?? ''
+export function wrapLines(el: HTMLElement, text: string): void {
   if (!text.trim()) return
 
   // 第一遍:token span 注入,读取自然换行位置
