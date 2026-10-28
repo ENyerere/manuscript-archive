@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom'
-import { usePostStore, getPostsByTag } from '@/store/postStore'
+import { usePostStore, getPostsByTag, getAllTags } from '@/store/postStore'
 import PostList from '@/components/post/PostList'
 import { ArrowLeft } from 'lucide-react'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
@@ -8,7 +8,22 @@ export default function TagPage() {
   const { tag } = useParams<{ tag: string }>()
   const posts = usePostStore((state) => state.posts)
   const filtered = tag ? getPostsByTag(posts, tag) : []
-  useDocumentTitle(`#${tag ?? ''}`)
+  // 标签是否真实存在(白名单内且有已发布文章);无效标签给 404 页,避免软 404
+  const exists = !!tag && getAllTags(posts).some((t) => t.tag === tag)
+  useDocumentTitle(exists ? `#${tag}` : '标签不存在')
+
+  if (!exists) {
+    return (
+      <div className="py-24">
+        <p className="font-mono text-xs text-muted-foreground tracking-[0.08em] mb-4">404</p>
+        <h1 className="text-4xl font-bold mb-4">标签不存在</h1>
+        <p className="text-muted-foreground mb-8">这个标签不存在或对应文章尚未发布。</p>
+        <Link to="/tags" className="u-line text-foreground">
+          ← 所有标签
+        </Link>
+      </div>
+    )
+  }
 
   return (
     <div className="py-4 md:py-6 pb-8">

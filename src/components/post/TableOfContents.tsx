@@ -69,7 +69,8 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
     setActiveId(id)
     // 瞬时跳转不产生连续滚动事件,直接解锁
     if (reduced) lockRef.current = false
-    window.history.replaceState(null, '', `#${id}`)
+    // 保留 history.state(React Router 的导航索引),否则后退时的滚动恢复会失效
+    window.history.replaceState(window.history.state, '', `#${id}`)
   }
 
   return (
