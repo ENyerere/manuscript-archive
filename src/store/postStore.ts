@@ -19,23 +19,13 @@ export interface Post {
 }
 
 interface PostState {
+  // 只读:文章唯一权威数据源是 src/content/posts/*.md,构建期加载,
+  // 不存在运行期增删改;要改文章就改 .md 文件重新构建
   posts: Post[]
-  // 会话内操作(不持久化)。文章权威数据源是 src/content/posts/*.md,
-  // 持久化缓存只会造成旧访客看到陈旧内容,故 F3 内容管线后已移除 persist。
-  addPost: (post: Post) => void
-  updatePost: (slug: string, updates: Partial<Post>) => void
-  deletePost: (slug: string) => void
 }
 
-export const usePostStore = create<PostState>()((set) => ({
+export const usePostStore = create<PostState>()(() => ({
   posts: contentPosts, // 构建期从 .md 文件加载
-  addPost: (post) => set((state) => ({ posts: [...state.posts, post] })),
-  updatePost: (slug, updates) =>
-    set((state) => ({
-      posts: state.posts.map((p) => (p.slug === slug ? { ...p, ...updates } : p)),
-    })),
-  deletePost: (slug) =>
-    set((state) => ({ posts: state.posts.filter((p) => p.slug !== slug) })),
 }))
 
 // 选择器函数(纯函数,便于在组件中调用)

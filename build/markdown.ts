@@ -52,7 +52,8 @@ function rehypeProse(headings: TocItem[]) {
 
       if (tag === 'a') {
         const href = String(node.properties.href ?? '')
-        if (!href.startsWith('#')) {
+        // 仅 http(s) 外链新开窗口;站内路径、mailto、页内锚点保持当前窗口
+        if (/^https?:\/\//.test(href)) {
           node.properties.target = '_blank'
           node.properties.rel = ['noopener', 'noreferrer']
         }
