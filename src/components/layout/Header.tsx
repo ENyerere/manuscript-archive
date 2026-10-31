@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Menu, X } from 'lucide-react'
@@ -43,20 +44,33 @@ export default function Header() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname])
 
-  // 打开后下一帧再加 visible,触发淡入/上浮过渡;同时锁定背景滚动
+  // 打开后下一帧再加 visible,触发淡入/上浮过渡;同时锁定背景滚动。
+  // 滚动锁用 position:fixed 钉住 body 而非 overflow:hidden——后者在 scrollY>0 时
+  // 会触发移动端视口重排,sticky 页头瞬跳闪烁(顶部打开时不闪正是因为 scrollY=0)
   useEffect(() => {
     if (!menuOpen) {
       setMenuVisible(false)
       return
     }
     const raf = requestAnimationFrame(() => setMenuVisible(true))
-    document.body.style.overflow = 'hidden'
+    const scrollY = window.scrollY
+    const { body } = document
+    body.style.position = 'fixed'
+    body.style.top = `-${scrollY}px`
+    body.style.left = '0'
+    body.style.right = '0'
+    body.style.overflow = 'hidden'
     // 焦点移入对话框;卸载时还给汉堡按钮
     closeButtonRef.current?.focus()
     const trigger = triggerRef.current
     return () => {
       cancelAnimationFrame(raf)
-      document.body.style.overflow = ''
+      body.style.position = ''
+      body.style.top = ''
+      body.style.left = ''
+      body.style.right = ''
+      body.style.overflow = ''
+      window.scrollTo(0, scrollY)
       trigger?.focus()
     }
   }, [menuOpen])
@@ -135,8 +149,10 @@ export default function Header() {
         </div>
       </div>
 
-      {/* 移动端全屏导航:整页覆盖的「索引」,大字号序号目录 + hairline 分隔 */}
-      {menuOpen && (
+      {/* 移动端全屏导航:整页覆盖的「索引」,大字号序号目录 + hairline 分隔。
+          portal 到 body:不嵌在 sticky 页头内,避免受页头堆叠上下文影响 */}
+      {menuOpen &&
+        createPortal(
         <div
           ref={dialogRef}
           role="dialog"
@@ -198,8 +214,9 @@ export default function Header() {
               {profile.name} · 手稿档案
             </span>
           </div>
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
     </header>
   )
 }
