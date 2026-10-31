@@ -40,7 +40,7 @@ export default function Footer() {
           <p className="font-mono text-xs">manuscript · archival · precise</p>
         </div>
         {/* ICP 备案号(合规要求:页脚展示并链接至工信部备案系统) */}
-        <div className="pt-4 text-xs opacity-40">
+        <div className="pt-4 text-xs opacity-60">
           <a
             href="https://beian.miit.gov.cn"
             target="_blank"

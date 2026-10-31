@@ -36,6 +36,17 @@ export default function HomePage() {
   }
   const setQuery = (value: string) => updateParams('q', value)
   const setActiveTag = (tag: string | null) => updateParams('tag', tag)
+  // 检索框本地值:IME 组字期间只更新本地,不上屏提交 URL——
+  // 受控值经路由往返会异步覆盖输入框,打断中文输入法组字
+  const [inputValue, setInputValue] = useState(query)
+  const composingRef = useRef(false)
+  const commitQuery = (value: string) => {
+    if (value !== query) setQuery(value)
+  }
+  // 外部导航(后退、分享链接)改动 ?q= 时同步回输入框;组字期间不打扰
+  useEffect(() => {
+    if (!composingRef.current) setInputValue(query)
+  }, [query])
   const searchRef = useRef<HTMLInputElement>(null)
   // 正文检索索引:首次聚焦或输入时才下载;就绪前只检索标题/摘要/标签
   const [bodyIndex, setBodyIndex] = useState<Record<string, string> | null>(null)
@@ -75,7 +86,9 @@ export default function HomePage() {
         e.preventDefault()
         searchRef.current?.focus()
       }
-      if (e.key === 'Escape' && target === searchRef.current) {
+      // 组字期间的 Esc 留给输入法取消候选,不要清空输入框
+      if (e.key === 'Escape' && target === searchRef.current && !e.isComposing) {
+        setInputValue('')
         setQuery('')
         searchRef.current?.blur()
       }
@@ -109,9 +122,22 @@ export default function HomePage() {
             id="post-search"
             ref={searchRef}
             type="text"
-            value={query}
+            value={inputValue}
             onFocus={requestIndex}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value
+              setInputValue(value)
+              // 上屏(change 发生于组字结束后)才提交 URL;Chrome 组字末段
+              // compositionend 先于最后一个 input 事件,两路都提交以保证覆盖
+              if (!(e.nativeEvent as InputEvent).isComposing) commitQuery(value)
+            }}
+            onCompositionStart={() => {
+              composingRef.current = true
+            }}
+            onCompositionEnd={(e) => {
+              composingRef.current = false
+              commitQuery(e.currentTarget.value)
+            }}
             placeholder="标题 / 摘要 / 标签 / 正文"
             autoComplete="off"
             className="w-full max-w-sm bg-transparent font-mono text-sm text-foreground placeholder:text-muted-foreground/60 border-b border-border focus:border-foreground outline-none transition-colors pb-1"
