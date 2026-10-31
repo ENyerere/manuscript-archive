@@ -106,7 +106,7 @@ brand
 
 ### 移动端
 
-- 单栏;元数据栏折行到标题上方;TOC 隐藏
+- 单栏;元数据栏折行到标题上方;桌面右栏 TOC 隐藏,改为正文前的折叠目录(MobileToc):「目录」行以 `+` / `×` 约定展开收起,点节标题跳转后自动收起
 - 页头导航折叠为汉堡按钮,点击展开**全屏索引页**(非抽屉):整页覆盖,顶行 `索引 / INDEX` + × 关闭,中部大字号序号目录(01–04,hairline 分隔,当前页下划线 + 「当前」标记),底部卷末标记;开 300ms 淡入 + 目录行 70ms 错峰上浮,关 300ms 淡出后卸载;Esc 可关,打开时锁定背景滚动
 
 ### 平台适配(iOS / WebKit)
@@ -182,13 +182,17 @@ brand
 
 ## Deployment
 
-- **托管**:GitHub Pages,https://enyerere.github.io/manuscript-archive/ ;push main 经 GitHub Actions 自动构建部署(`.github/workflows/deploy.yml`)
+- **主站**:https://yshenyi.ink/ (阿里云 + Caddy,HTTPS,页脚展示 ICP 备案号);push main 经 `.github/workflows/deploy-server.yml` 构建并同步到服务器。Caddy `try_files {path}.html {path} /index.html` 优先命中静态页;静态资源长缓存,HTML no-cache
+- **镜像**:GitHub Pages,https://enyerere.github.io/manuscript-archive/ (`.github/workflows/deploy.yml`)
+- **双端变量**:`VITE_BASE` 控制路径前缀(Pages `/manuscript-archive/`,主站 `/`);`SITE_URL` 控制绝对地址,sitemap.xml / feed.xml / robots.txt 构建期一律按它生成——写死域名的文件不进 `public/`
 - **子路径**:Pages 构建注入 `VITE_BASE=/manuscript-archive/`;本地预览保持根路径。`index.html` 中的静态资源引用(favicon、manifest、feed)一律用 `%BASE_URL%` 前缀(构建期替换为部署根路径)——不写死 github.io 绝对地址,否则自有服务器主站会跨域回源到镜像;运行时资源用 `import.meta.env.BASE_URL` 或 `import` 引入
 - **按路由静态页**:构建期为文章/标签/系列/归档/关于生成 `posts/<slug>.html` 等扁平文件(独立 title、description、OG、canonical,`<noscript>` 内含正文或文章列表),Pages 与 Caddy(`try_files {path}.html`)直接命中;不做 SSR 注水,加载后仍由 SPA 接管
 - **SPA 深链接兜底**:`public/404.html` 编码 + `index.html` 解码脚本回退;`pathSegmentsToKeep` 构建期按 base 段数自动改写;路由 `basename` 取 `BASE_URL`
 - **正文管线**:Markdown 在构建期渲染为 HTML(`build/markdown.ts`,含代码高亮与标题锚点),客户端不再携带 Markdown 解析器;正文按篇拆 chunk,检索正文索引首次检索时才下载
 - **构建期注入**:文章 git 版本(virtual:post-revisions,checkout 需 `fetch-depth: 0`)、`dist/feed.xml`(RSS 2.0,最新 20 篇已发布文章,`content:encoded` 输出全文)、GitHub 活数据(virtual:github-projects / virtual:github-languages,API 失败降级为配置信息,构建不中断)
 - **定时重建**:每周一 03:17 UTC 触发,刷新关于页的 GitHub 项目与语言数据,无需 push 代码
+- **软 404 治理**:静态托管对无效路径恒返回 200;404 分支(NotFound / 无效标签 / 无效文章 / 无效系列)渲染时注入 `<meta name="robots" content="noindex, nofollow">`(`useNoIndex`),离开页面自动移除
+- **韧性约定**:`index.html` 内联脚本在首帧绘制前按 localStorage / 系统偏好加 dark class,防深色用户闪白;带 hash 的 chunk 加载失败自动刷新一次(`chunkReload`),仍失败显示 RouteError 页
 
 ### 关于页 GitHub 数据约定
 
@@ -196,11 +200,6 @@ brand
 - **语言占比**:聚合全部**非 fork** 仓库的 Linguist 字节数,Top 6 + 「其他」;口径明确标注「按 GitHub 代码量」——它反映编码活动而非熟练度;API 不可用时回退 `fallbackLanguages` 手写清单
 - **技能方向**:语言之外的能力维度(如软件测试)人工策展于 `disciplines`,与语言区分离
 
-## Migration Notes(从现风格迁移的影响面)
+## Migration Notes
 
-- `globals.css`:OKLCH `--hue` 体系 → ink/paper 语义变量(HEX 或 OKLCH 均可,保持 `<alpha-value>` 解析方式);`.card-base`/`.btn-regular` 弃用
-- `tailwind.config.js`:色彩映射改为语义变量;圆角语言重定义;字体栈更新
-- 组件:`PostCard` → 行式条目;`SideBar` Profile/标签卡 → hairline 区块或并入页头/页脚;`TagCloud` Badge → bracket 过滤器;`TOC` 样式重写(逻辑保留)
-- 动效:GSAP + SplitText 移除(包体 −70KB 量级),换自研 line-reveal(~40 行 JS);错峰入场 CSS 重写
-- 页面:首页/归档/标签/关于按 Layout 章节重排;文章页头部改为 YAML 元数据块
-- 保留不动:路由结构、postStore 与选择器、useTheme、TOC 逻辑、reduced-motion 基建、SPA 404 回退
+迁移已于 2026-07 完成并上线,过程记录保留在 git 历史与「博客改造日志」系列文章中,本节不再维护。
