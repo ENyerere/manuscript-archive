@@ -45,33 +45,22 @@ export default function Header() {
   }, [pathname])
 
   // 打开后下一帧再加 visible,触发淡入/上浮过渡;同时锁定背景滚动。
-  // 滚动锁用 position:fixed 钉住 body 而非 overflow:hidden——后者在 scrollY>0 时
-  // 会触发移动端视口重排,sticky 页头瞬跳闪烁(顶部打开时不闪正是因为 scrollY=0)
+  // 焦点必须 preventScroll:移动端浏览器会尝试把聚焦元素滚动进可视区,
+  // 在滚动锁定的背景下会引起 sticky 页头瞬跳(页面顶部打开正常正是因为无需滚动)
   useEffect(() => {
     if (!menuOpen) {
       setMenuVisible(false)
       return
     }
     const raf = requestAnimationFrame(() => setMenuVisible(true))
-    const scrollY = window.scrollY
-    const { body } = document
-    body.style.position = 'fixed'
-    body.style.top = `-${scrollY}px`
-    body.style.left = '0'
-    body.style.right = '0'
-    body.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
     // 焦点移入对话框;卸载时还给汉堡按钮
-    closeButtonRef.current?.focus()
+    closeButtonRef.current?.focus({ preventScroll: true })
     const trigger = triggerRef.current
     return () => {
       cancelAnimationFrame(raf)
-      body.style.position = ''
-      body.style.top = ''
-      body.style.left = ''
-      body.style.right = ''
-      body.style.overflow = ''
-      window.scrollTo(0, scrollY)
-      trigger?.focus()
+      document.body.style.overflow = ''
+      trigger?.focus({ preventScroll: true })
     }
   }, [menuOpen])
 
