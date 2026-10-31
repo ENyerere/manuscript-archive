@@ -18,6 +18,7 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.18.1",
     "tailwind-merge": "^3.6.0",
+    "web-vitals": "^6.2.3",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
