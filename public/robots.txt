@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://enyerere.github.io/manuscript-archive/sitemap.xml

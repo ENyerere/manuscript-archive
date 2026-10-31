@@ -290,6 +290,10 @@ ${urls
 </urlset>
 `
       this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: xml })
+
+      // robots.txt 随构建生成:Sitemap 行指向当前部署端的 sitemap(双端域名不同,不能写死)
+      const robots = `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`
+      this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robots })
     },
   }
 }

@@ -8,6 +8,7 @@ import PostLink from '@/components/post/PostLink'
 import LineReveal from '@/components/LineReveal'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { useNoIndex } from '@/hooks/useNoIndex'
 
 export default function PostPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -17,6 +18,7 @@ export default function PostPage() {
   const post = slug ? getPostBySlug(posts, slug) : undefined
   const tocItems = body?.headings ?? []
   useDocumentTitle(post && body ? post.title : '文章不存在')
+  useNoIndex(!post || !body)
 
   if (!post || !body) {
     return (

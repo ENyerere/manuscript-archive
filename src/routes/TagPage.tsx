@@ -3,6 +3,7 @@ import { usePostStore, getPostsByTag, getAllTags } from '@/store/postStore'
 import PostList from '@/components/post/PostList'
 import { ArrowLeft } from 'lucide-react'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { useNoIndex } from '@/hooks/useNoIndex'
 
 export default function TagPage() {
   const { tag } = useParams<{ tag: string }>()
@@ -11,6 +12,7 @@ export default function TagPage() {
   // 标签是否真实存在(白名单内且有已发布文章);无效标签给 404 页,避免软 404
   const exists = !!tag && getAllTags(posts).some((t) => t.tag === tag)
   useDocumentTitle(exists ? `#${tag}` : '标签不存在')
+  useNoIndex(!exists)
 
   if (!exists) {
     return (

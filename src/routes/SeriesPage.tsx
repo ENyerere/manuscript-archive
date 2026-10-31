@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom'
 import { usePostStore, getSeriesPosts } from '@/store/postStore'
 import PostList from '@/components/post/PostList'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { useNoIndex } from '@/hooks/useNoIndex'
 
 /**
  * 系列合集页:按时间正序列出同系列文章(第 1 篇在前,符合阅读顺序)。
@@ -14,6 +15,7 @@ export default function SeriesPage() {
   const seriesName = name ?? ''
   const seriesPosts = seriesName ? getSeriesPosts(posts, seriesName) : []
   useDocumentTitle(seriesPosts.length > 0 ? `系列:${seriesName}` : '系列不存在')
+  useNoIndex(!seriesName || seriesPosts.length === 0)
 
   if (!seriesName || seriesPosts.length === 0) {
     return (
