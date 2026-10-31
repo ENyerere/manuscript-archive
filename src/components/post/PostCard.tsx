@@ -28,6 +28,8 @@ export default function PostCard({ post, index, dimmed = false }: PostCardProps)
   const date = post.createdAt.slice(0, 10)
   const wordCount = post.wordCount
   const readTime = Math.max(1, Math.ceil(wordCount / 300))
+  // 未命中条目:视觉衰减保留,但其链接移出 Tab 顺序(文章变多后键盘成本可控)
+  const linkTabIndex = dimmed ? -1 : undefined
 
   return (
     <div className={`transition-opacity duration-300 ${dimmed ? 'opacity-30' : ''}`}>
@@ -43,6 +45,7 @@ export default function PostCard({ post, index, dimmed = false }: PostCardProps)
         <div className="min-w-0">
           <PostLink
             slug={post.slug}
+            tabIndex={linkTabIndex}
             className="block text-xl md:text-2xl font-semibold tracking-[-0.015em] text-foreground hover:underline underline-offset-4 mb-2"
           >
             {post.title}
@@ -56,7 +59,7 @@ export default function PostCard({ post, index, dimmed = false }: PostCardProps)
               {post.tags.map((tag, i) => (
                 <span key={tag}>
                   {i > 0 && ' · '}
-                  <Link to={`/tags/${encodeURIComponent(tag)}`} className="hover:text-foreground hover:underline underline-offset-2">
+                  <Link to={`/tags/${encodeURIComponent(tag)}`} tabIndex={linkTabIndex} className="hover:text-foreground hover:underline underline-offset-2">
                     {tag}
                   </Link>
                 </span>
@@ -72,6 +75,7 @@ export default function PostCard({ post, index, dimmed = false }: PostCardProps)
                 <span aria-hidden="true">/</span>
                 <Link
                   to={`/series/${encodeURIComponent(series.name)}`}
+                  tabIndex={linkTabIndex}
                   className="hover:text-foreground hover:underline underline-offset-2"
                 >
                   {series.name} · {seriesOrdinal(series.index)}

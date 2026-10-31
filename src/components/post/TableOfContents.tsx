@@ -59,6 +59,9 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
     const target = document.getElementById(id)
     if (!target) return
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    // 焦点移交目标标题:读屏焦点跟随跳转,不再留在目录链接上
+    target.tabIndex = -1
+    target.focus({ preventScroll: true })
     lockRef.current = true
     // 兜底:若目标已在视口内(无滚动事件),1s 后自动解锁
     if (unlockTimerRef.current) clearTimeout(unlockTimerRef.current)

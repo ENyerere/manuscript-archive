@@ -3,9 +3,10 @@
  * 构建期 Markdown 渲染插件(build/markdown.ts)按标签名注入;放在 src 下是为了让 Tailwind 扫描到这些 class。
  */
 export const proseClasses: Record<string, string> = {
-  h1: 'text-3xl font-bold mt-12 mb-4 text-foreground',
-  h2: 'text-2xl font-bold mt-10 mb-3 text-foreground scroll-mt-24',
-  h3: 'text-xl font-medium mt-8 mb-2 text-foreground scroll-mt-24',
+  // 标题可被目录跳转程序化聚焦(tabIndex=-1,不在 Tab 序),不显示焦点环
+  h1: 'text-3xl font-bold mt-12 mb-4 text-foreground focus:outline-none',
+  h2: 'text-2xl font-bold mt-10 mb-3 text-foreground scroll-mt-24 focus:outline-none',
+  h3: 'text-xl font-medium mt-8 mb-2 text-foreground scroll-mt-24 focus:outline-none',
   p: 'leading-8 mb-6 text-foreground/90',
   ul: 'list-disc pl-6 mb-6 leading-8 text-foreground/90 space-y-1',
   ol: 'list-decimal pl-6 mb-6 leading-8 text-foreground/90 space-y-1',

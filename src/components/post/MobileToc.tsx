@@ -19,6 +19,9 @@ export default function MobileToc({ items }: MobileTocProps) {
     if (!target) return
     detailsRef.current?.removeAttribute('open')
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    // 焦点移交目标标题:读屏焦点跟随跳转,不再留在目录链接上
+    target.tabIndex = -1
+    target.focus({ preventScroll: true })
     target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
     window.history.replaceState(window.history.state, '', `#${id}`)
   }

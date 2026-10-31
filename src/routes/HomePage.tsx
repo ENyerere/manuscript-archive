@@ -54,7 +54,12 @@ export default function HomePage() {
   const requestIndex = () => {
     if (indexRequested.current) return
     indexRequested.current = true
-    void loadSearchIndex().then(setBodyIndex)
+    // 加载失败允许下次聚焦/输入时重试(成功前标题/摘要/标签检索一直可用)
+    void loadSearchIndex()
+      .then(setBodyIndex)
+      .catch(() => {
+        indexRequested.current = false
+      })
   }
 
   const trimmedQuery = query.trim()
@@ -147,8 +152,8 @@ export default function HomePage() {
           </kbd>
         </div>
 
-        {/* 档案统计行:检索时切换为命中统计 */}
-        <p className="font-mono text-xs text-muted-foreground tracking-[0.08em] mb-8">
+        {/* 档案统计行:检索时切换为命中统计;aria-live 让读屏播报过滤结果变化 */}
+        <p role="status" aria-live="polite" className="font-mono text-xs text-muted-foreground tracking-[0.08em] mb-8">
           {searching
             ? `检索「${trimmedQuery}」· 命中 ${hitCount} / ${sortedPosts.length} 篇`
             : `共 ${sortedPosts.length} 篇手稿 · ${tags.length} 个标签`}
