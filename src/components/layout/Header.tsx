@@ -90,8 +90,14 @@ export default function Header() {
     return () => window.removeEventListener('keydown', onKey)
   }, [menuOpen])
 
+  // 菜单打开期间页头整体淡出隐藏:职责由全屏索引页顶行(索引/INDEX + ×)接管;
+  // opacity/visibility 切换不影响 sticky 占位,布局零位移,杜绝页头闪烁
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-background">
+    <header
+      className={`sticky top-0 z-40 w-full border-b border-border bg-background transition-all duration-300 ${
+        menuOpen ? 'opacity-0 invisible' : 'opacity-100 visible'
+      }`}
+    >
       <div className="w-full max-w-[var(--page-width)] mx-auto px-6 md:px-8 flex h-16 items-center justify-between">
         <Link
           to="/"
