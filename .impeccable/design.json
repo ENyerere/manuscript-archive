@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-31T18:10:00+08:00",
+  "title": "Design System: 小峄热心市民 · Manuscript Archive",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper 纸面",
+        "canonical": "#fafafa",
+        "tonalRamp": ["#262626", "#3d3d3d", "#5c5c5c", "#7a7a7a", "#999999", "#b8b8b8", "#d6d6d6", "#fafafa"]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Ink 墨色",
+        "canonical": "#0a0a0a",
+        "tonalRamp": ["#0a0a0a", "#1f1f1f", "#333333", "#4d4d4d", "#666666", "#808080", "#999999", "#b3b3b3"]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Ink-2 墨二",
+        "canonical": "#3d3d3d",
+        "tonalRamp": ["#141414", "#242424", "#3d3d3d", "#575757", "#707070", "#8a8a8a", "#a3a3a3", "#bdbdbd"]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Ink-3 静音灰",
+        "canonical": "#999999",
+        "tonalRamp": ["#333333", "#4d4d4d", "#666666", "#808080", "#999999", "#adadad", "#c2c2c2", "#d6d6d6"]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline 细线",
+        "canonical": "#e5e5e5",
+        "tonalRamp": ["#4d4d4d", "#666666", "#808080", "#999999", "#adadad", "#c2c2c2", "#d6d6d6", "#e5e5e5"]
+      },
+      "paper-2": {
+        "role": "neutral",
+        "displayName": "Paper-2 纸二",
+        "canonical": "#f2f2f2",
+        "tonalRamp": ["#5c5c5c", "#757575", "#8f8f8f", "#a8a8a8", "#bdbdbd", "#d1d1d1", "#e2e2e2", "#f2f2f2"]
+      },
+      "codeblock-bg": {
+        "role": "neutral",
+        "displayName": "Codeblock 代码底",
+        "canonical": "#141414",
+        "tonalRamp": ["#141414", "#262626", "#383838", "#4a4a4a", "#5c5c5c", "#6e6e6e", "#808080", "#929292"]
+      },
+      "destructive": {
+        "role": "primary",
+        "displayName": "Destructive 单色红",
+        "canonical": "#be3a32",
+        "tonalRamp": ["#3f130f", "#5c1d16", "#79261d", "#963025", "#be3a32", "#cb5f57", "#d98480", "#e6a9a7"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "页脚超大署名与文章页 H1;H1 入场配逐行揭示动画。" },
+      "headline": { "displayName": "Headline", "purpose": "章节标题与页面标题。" },
+      "body": { "displayName": "Body", "purpose": "长文阅读,measure 约 68ch,行高 1.75。" },
+      "label": { "displayName": "Label", "purpose": "拉丁小标签可 uppercase;中文标签同字号字重 500,不强行大写。" },
+      "mono": { "displayName": "Metadata Mono", "purpose": "YAML 元数据、日期、版本 hash、代码;档案感的来源。" }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "line-reveal", "value": "1400ms cubic-bezier(0.19, 1, 0.22, 1), 逐行错峰 140ms", "purpose": "签名动效一:文章标题逐行揭示,仅入场一次。" },
+      { "name": "theme-reveal", "value": "500ms ease-in-out, clip-path circle()", "purpose": "签名动效二:主题圆形扩散;iOS 降级为 .theme-wipe 遮罩擦除(150ms 入 / 220ms 出)。" },
+      { "name": "fade-up", "value": "400ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "列表条目入场:opacity + translateY(8px),错峰 index × 100ms,一次性。" },
+      { "name": "u-line-grow", "value": "200ms ease, scaleX(0 → 1)", "purpose": "页脚/社交链接下划线生长,线高 2px。" },
+      { "name": "filter-fade", "value": "300ms ease, opacity → 0.3", "purpose": "过滤切换时未命中条目衰减,不移除不重排。" }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" },
+      { "name": "2xl", "value": "1536px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "墨底纸字的唯一按钮形态,直角至 2px,无阴影。",
+      "html": "<button class=\"ds-btn-primary\">保存修改</button>",
+      "css": ".ds-btn-primary { background: #0a0a0a; color: #fafafa; padding: 8px 16px; border: none; border-radius: 2px; font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s ease; } .ds-btn-primary:hover { background: #3d3d3d; } .ds-btn-primary:focus-visible { outline: 2px solid #0a0a0a; outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Link (u-line)",
+      "kind": "custom",
+      "refersTo": "text-link",
+      "description": "页脚/社交链接:纯文字,hover 下划线从左生长,线高 2px。",
+      "html": "<a class=\"ds-u-line\" href=\"#\">GitHub</a>",
+      "css": ".ds-u-line { position: relative; color: #0a0a0a; text-decoration: none; font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 18px; } .ds-u-line::after { content: ''; position: absolute; left: 0; bottom: -3px; height: 2px; width: 100%; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform 0.2s ease; } .ds-u-line:hover::after { transform: scaleX(1); }"
+    },
+    {
+      "name": "Filter Chip (bracket)",
+      "kind": "chip",
+      "refersTo": "chip-filter",
+      "description": "标签过滤器:纯文字按钮,激活态用 > < bracket 包裹,同步 aria-pressed。",
+      "html": "<button class=\"ds-chip\" aria-pressed=\"false\">前端</button> <button class=\"ds-chip ds-chip-active\" aria-pressed=\"true\">前端</button>",
+      "css": ".ds-chip { background: none; border: none; padding: 4px 2px; color: #0a0a0a; font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 14px; cursor: pointer; } .ds-chip:hover { text-decoration: underline; text-underline-offset: 3px; } .ds-chip:focus-visible { outline: 2px solid #0a0a0a; outline-offset: 2px; } .ds-chip-active::before { content: '>\\00a0'; } .ds-chip-active::after { content: '\\00a0<'; }"
+    },
+    {
+      "name": "Post List Entry",
+      "kind": "custom",
+      "refersTo": "post-entry",
+      "description": "索引页文章条目:等宽日期栏 + 标题 + 静音摘要,hairline 分隔,hover 标题出下划线。",
+      "html": "<a class=\"ds-entry\" href=\"#\"><span class=\"ds-entry-date\">2026-10-31</span><span class=\"ds-entry-main\"><span class=\"ds-entry-title\">示例文章标题</span><span class=\"ds-entry-excerpt\">这是一段静音的摘要文字,用来帮助读者判断要不要点开。</span></span></a>",
+      "css": ".ds-entry { display: flex; gap: 24px; align-items: baseline; padding: 24px 0; border-bottom: 1px solid #e5e5e5; text-decoration: none; } .ds-entry-date { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; color: #999999; flex-shrink: 0; } .ds-entry-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; } .ds-entry-title { color: #0a0a0a; font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 18px; } .ds-entry:hover .ds-entry-title { text-decoration: underline; text-underline-offset: 3px; } .ds-entry-excerpt { color: #999999; font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 14px; }"
+    },
+    {
+      "name": "YAML Metadata Block",
+      "kind": "custom",
+      "refersTo": "yaml-metadata",
+      "description": "签名组件:文章头部 front-matter 式元数据,标签名等宽固定约 6em,值内联。",
+      "html": "<div class=\"ds-meta\"><div class=\"ds-meta-row\"><span class=\"ds-meta-key\">date:</span><span class=\"ds-meta-val\">2026-10-31</span></div><div class=\"ds-meta-row\"><span class=\"ds-meta-key\">tags:</span><span class=\"ds-meta-val\">[随笔] [前端]</span></div><div class=\"ds-meta-row\"><span class=\"ds-meta-key\">rev:</span><span class=\"ds-meta-val\"><a class=\"ds-meta-link\" href=\"#\">7cfaf82</a></span></div></div>",
+      "css": ".ds-meta { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; color: #3d3d3d; } .ds-meta-row { display: flex; padding: 2px 0; } .ds-meta-key { flex-shrink: 0; width: 6em; color: #999999; } .ds-meta-link { color: inherit; text-decoration: underline; text-underline-offset: 3px; }"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "首页检索条:无线框,仅 hairline 底线,mono 字体,/ 聚焦 Esc 清空。",
+      "html": "<input class=\"ds-search\" type=\"text\" placeholder=\"检索标题 / 摘要 / 标签\" />",
+      "css": ".ds-search { width: 100%; background: transparent; border: none; border-bottom: 1px solid #e5e5e5; padding: 8px 0; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; color: #0a0a0a; transition: border-color 0.2s ease; } .ds-search::placeholder { color: #999999; } .ds-search:focus { outline: none; border-bottom-color: #0a0a0a; }"
+    },
+    {
+      "name": "TOC Item",
+      "kind": "nav",
+      "refersTo": "toc-item",
+      "description": "文章页右栏目录:当前章节用字重 + 左侧短粗线指示,不用色块。",
+      "html": "<nav class=\"ds-toc\"><a class=\"ds-toc-item\" href=\"#\">一、章节标题</a><a class=\"ds-toc-item ds-toc-current\" href=\"#\" aria-current=\"true\">二、当前章节</a><a class=\"ds-toc-item\" href=\"#\">三、后续章节</a></nav>",
+      "css": ".ds-toc { display: flex; flex-direction: column; gap: 2px; } .ds-toc-item { position: relative; padding: 4px 0 4px 16px; color: #999999; text-decoration: none; font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 14px; } .ds-toc-item:hover { color: #0a0a0a; } .ds-toc-current { color: #0a0a0a; font-weight: 600; } .ds-toc-current::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 8px; height: 2px; background: #0a0a0a; }"
+    },
+    {
+      "name": "Code Block",
+      "kind": "custom",
+      "refersTo": "code-block",
+      "description": "始终深色的代码块(明暗主题一致),低饱和单色阶梯语法高亮,直角。",
+      "html": "<pre class=\"ds-code\"><code><span class=\"ds-code-kw\">const</span> theme = <span class=\"ds-code-str\">'manuscript'</span> <span class=\"ds-code-cm\">// 单色即态度</span></code></pre>",
+      "css": ".ds-code { background: #141414; color: #c4c4c4; padding: 16px 20px; border-radius: 0; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; line-height: 1.7; overflow-x: auto; } .ds-code-kw { color: #e5e5e5; font-weight: 600; } .ds-code-str { color: #a8b8a8; } .ds-code-cm { color: #737373; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Manuscript Archive（手稿档案）",
+    "overview": "这个博客不是\"网站\",而是一叠被持续修订的手稿:每篇文章是一个有版本、有元数据、被认真归档的文档。视觉语言来自纯文本世界——等宽字体、YAML front matter、细线、留白的纸面——而非来自 UI 组件库。技术感不靠霓虹与终端绿表达,而靠排版的纪律性表达。明暗主题互为严格反转,信息层级完全由墨与纸的明度对比、字重与留白驱动。动效克制到只剩两种签名:文章标题的逐行揭示与主题切换的圆形扩散——墨晕于纸,暗合手稿隐喻。",
+    "keyCharacteristics": [
+      "纯单色双色系统,全站无主题色相;链接靠下划线而非颜色识别",
+      "1px hairline 取代卡片、阴影与圆角堆叠来组织内容",
+      "双轨字体:JetBrains Mono 驱动元数据与界面,系统黑体驱动正文阅读",
+      "签名元素:YAML 元数据块、bracket 过滤器、页脚墨色反转卷末",
+      "平面无阴影、无渐变、无玻璃拟态;层次仅由 hairline 与留白构成"
+    ],
+    "rules": [
+      { "name": "The No-Accent Rule(无主题色规则)", "body": "全站不存在主题色。可交互元素的识别方式是下划线、字重变化、bracket 符号,永远不是颜色。代码语法高亮是唯一多色区域,且必须低饱和。", "section": "colors" },
+      { "name": "The Strict Inversion Rule(严格反转规则)", "body": "暗色主题不是另一套配色,而是同一套语义的反转:paper ↔ ink 互换,代码块保持深色不变。新增颜色必须同时定义明暗两值。", "section": "colors" },
+      { "name": "The Muted-With-Intent Rule(刻意静音规则)", "body": "ink-3 低于 AA 是刻意的,只许用在元数据与辅助说明;任何承载关键信息或可操作的元素不得使用 muted 色。", "section": "colors" },
+      { "name": "The Two-Track Rule(双轨规则)", "body": "凡是关于文档的信息(元数据、时间、计数、版本)用 JetBrains Mono;凡是被阅读的内容(标题、正文)用系统黑体。不混用,不引入第三种字体。", "section": "typography" },
+      { "name": "The No-Italic-CJK Rule(中文不斜体规则)", "body": "强调靠字重,不靠斜体;衬线中文正文已被否决。", "section": "typography" },
+      { "name": "The Flat-By-Default Rule(平面默认规则)", "body": "任何元素默认无阴影。需要浮起的感觉,先问能不能用 hairline 或留白解决。", "section": "elevation" },
+      { "name": "The Hairline-Is-The-Container Rule(细线即容器规则)", "body": "分隔内容用 1px line 色细线,不用卡片背景、色块堆叠、圆角分组。3px 墨粗线仅限索引页签名位。", "section": "elevation" }
+    ],
+    "dos": [
+      "Do 用 hairline(1px, line 色)分隔一切内容区块;需要更强分隔时优先加大留白,而不是加粗线(3px 墨线仅限索引页签名位)",
+      "Do 元数据一律 JetBrains Mono,标签名固定宽度约 6em,保持 YAML 块的对齐纪律",
+      "Do 新增颜色时同时定义明暗两值,并保持暗色 = 严格反转的语义",
+      "Do 交互反馈用下划线生长、字重变化、bracket 符号、opacity 衰减",
+      "Do 动效保持克制:入场 400ms、过滤 300ms、下划线 200ms;每个动画都要有明确目的",
+      "Do iOS 上禁用 View Transitions,用 .theme-wipe 单元素遮罩擦除做降级补偿"
+    ],
+    "donts": [
+      "Don't 使用任何主题色相、彩色渐变、玻璃拟态或阴影(代码语法高亮除外,且必须低饱和)",
+      "Don't 引入卡片:不用背景色块、圆角容器、阴影分组来组织列表或内容",
+      "Don't 用颜色单独传达状态;必须配下划线/字重/符号/文字",
+      "Don't 给中文标题用斜体,或给中文标签强行 uppercase",
+      "Don't 给关键信息或可操作元素使用 ink-3 静音色(仅限元数据)",
+      "Don't 新增签名动效;逐行揭示与主题扩散之外,动效一律次级规格"
+    ]
+  }
+}
