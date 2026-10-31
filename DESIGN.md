@@ -167,7 +167,7 @@ components:
 
 ### Navigation
 - **Style:** 桌面端 4 个平级文字链接,语义化 `<nav>`;当前页下划线 + 字重区分
-- **Mobile:** 汉堡按钮 → 全屏索引页(序号 01–04 大字号目录,hairline 分隔,当前页下划线 +「当前」标记,顶行 索引 / INDEX + × 关闭,底部卷末标记)
+- **Mobile:** 汉堡按钮 → 全屏索引页(序号 01–04 大字号目录,hairline 分隔,当前页下划线 +「当前」标记,顶行 索引 / INDEX + × 关闭,底部卷末标记);菜单打开期间页头整体淡出隐藏(300ms opacity/visibility,占位不变),其职责由索引页顶行接管
 
 ### Footer(卷末)
 - **Style:** 整页唯一大面积色块:ink 底 paper 字的反转;超大字号(Display)署名 + 文字社交链接(u-line 下划线生长)+ RSS;底部 hairline(border-background/20)上版权行与 ICP 备案号
