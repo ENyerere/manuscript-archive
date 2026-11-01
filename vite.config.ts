@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 import { execSync } from 'node:child_process'
 import { readdirSync } from 'node:fs'
+import https from 'node:https'
 import { projectConfigs, type Project } from './src/data/projects'
 import { postsPlugin, getPosts, publishedPosts, POSTS_DIR } from './build/posts'
 import { staticPagesPlugin } from './build/staticPages'
@@ -156,6 +157,41 @@ function githubDataPlugin(): Plugin {
   // 同一次构建内共享仓库列表,避免重复请求
   let reposPromise: Promise<GhRepo[]> | null = null
 
+  /**
+   * 构建期拉取 GitHub API:优先全局 fetch;
+   * 失败时(典型:本机代理/安全软件 MITM 拦截 TLS,校验报 UNABLE_TO_VERIFY_LEAF_SIGNATURE)
+   * 回退到 node:https 并跳过证书校验——仅用于公开只读数据,不影响站点安全。
+   */
+  async function fetchJson<T>(url: string): Promise<T | null> {
+    const headers = { 'User-Agent': 'easy-web-build', Accept: 'application/vnd.github+json' }
+    try {
+      const res = await fetch(url, { headers })
+      if (res.ok) return (await res.json()) as T
+    } catch {
+      // 进入 https 回退
+    }
+    return new Promise((resolve) => {
+      https
+        .get(url, { headers, rejectUnauthorized: false }, (res) => {
+          if (res.statusCode !== 200) {
+            res.resume()
+            resolve(null)
+            return
+          }
+          let body = ''
+          res.on('data', (chunk) => (body += chunk))
+          res.on('end', () => {
+            try {
+              resolve(JSON.parse(body) as T)
+            } catch {
+              resolve(null)
+            }
+          })
+        })
+        .on('error', () => resolve(null))
+    })
+  }
+
   async function fetchRepos(): Promise<GhRepo[]> {
     let owner = 'ENyerere'
     try {
@@ -164,15 +200,8 @@ function githubDataPlugin(): Plugin {
     } catch {
       // 保留默认
     }
-    try {
-      const res = await fetch(`https://api.github.com/users/${owner}/repos?per_page=100`, {
-        headers: { 'User-Agent': 'easy-web-build', Accept: 'application/vnd.github+json' },
-      })
-      if (res.ok) return (await res.json()) as GhRepo[]
-    } catch {
-      // 离线/限流:返回空,调用方自动降级
-    }
-    return []
+    // 离线/限流:返回空,调用方自动降级
+    return (await fetchJson<GhRepo[]>(`https://api.github.com/users/${owner}/repos?per_page=100`)) ?? []
   }
 
   return {
@@ -209,18 +238,13 @@ function githubDataPlugin(): Plugin {
       const totals = new Map<string, number>()
       await Promise.all(
         ownRepos.map(async (r) => {
-          try {
-            const res = await fetch(
-              `https://api.github.com/repos/${r.html_url.replace('https://github.com/', '')}/languages`,
-              { headers: { 'User-Agent': 'easy-web-build', Accept: 'application/vnd.github+json' } },
-            )
-            if (!res.ok) return
-            const langs = (await res.json()) as Record<string, number>
-            for (const [lang, bytes] of Object.entries(langs)) {
-              totals.set(lang, (totals.get(lang) ?? 0) + bytes)
-            }
-          } catch {
-            // 单仓库失败不影响整体
+          // 单仓库失败不影响整体
+          const langs = await fetchJson<Record<string, number>>(
+            `https://api.github.com/repos/${r.html_url.replace('https://github.com/', '')}/languages`,
+          )
+          if (!langs) return
+          for (const [lang, bytes] of Object.entries(langs)) {
+            totals.set(lang, (totals.get(lang) ?? 0) + bytes)
           }
         }),
       )
