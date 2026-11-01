@@ -4,6 +4,8 @@ import projects from 'virtual:github-projects'
 import languages from 'virtual:github-languages'
 import { socials } from '@/data/socials'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import Highlighter from '@/components/ui/Highlighter'
+import BlurFade from '@/components/ui/BlurFade'
 
 /**
  * 关于页:单栏阅读宽度,hairline 分节,无卡片。
@@ -23,12 +25,15 @@ export default function AboutPage() {
           alt={profile.name}
           className="w-16 h-16 rounded-sm object-cover mb-6"
         />
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">{profile.name}</h1>
+        <BlurFade duration={0.6} offset={4} blur="8px">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">{profile.name}</h1>
+        </BlurFade>
         <p className="font-mono text-sm text-muted-foreground mb-6">{profile.role}</p>
         <p className="leading-8 text-foreground/90">{profile.about}</p>
       </header>
 
       {/* 技能:语言(GitHub 代码量自动聚合)+ 方向(人工策展) */}
+      <BlurFade inView>
       <section className="border-t border-border pt-8 mt-8">
         <h2 className="font-mono text-xs tracking-[0.08em] text-muted-foreground uppercase mb-4">
           技能 / Skills
@@ -70,8 +75,10 @@ export default function AboutPage() {
           <p className="font-mono text-sm leading-8">{disciplines.join(' · ')}</p>
         </div>
       </section>
+      </BlurFade>
 
       {/* 项目:构建期注入的 GitHub 策展数据(src/data/projects.ts 维护名单) */}
+      <BlurFade inView>
       <section className="border-t border-border pt-8 mt-8">
         <h2 className="font-mono text-xs tracking-[0.08em] text-muted-foreground uppercase mb-2">
           项目 / Projects
@@ -103,8 +110,10 @@ export default function AboutPage() {
           ))}
         </div>
       </section>
+      </BlurFade>
 
       {/* 联系 */}
+      <BlurFade inView>
       <section className="border-t border-border pt-8 mt-8">
         <h2 className="font-mono text-xs tracking-[0.08em] text-muted-foreground uppercase mb-4">
           联系 / Contact
@@ -118,14 +127,17 @@ export default function AboutPage() {
                 href={social.url}
                 target={isHttp ? '_blank' : undefined}
                 rel={isHttp ? 'noopener noreferrer' : undefined}
-                className="u-line text-foreground"
+                className="group text-foreground"
               >
-                {social.label}
+                <Highlighter action="underline" hoverOnly strokeWidth={1.5} animationDuration={300} iterations={2}>
+                  {social.label}
+                </Highlighter>
               </a>
             )
           })}
         </div>
       </section>
+      </BlurFade>
     </div>
   )
 }

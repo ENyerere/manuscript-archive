@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import type { Post } from '@/store/postStore'
 import { usePostStore, getSeriesInfo } from '@/store/postStore'
 import PostLink from './PostLink'
+import Highlighter from '@/components/ui/Highlighter'
 
 /** 系列序号的中文表述:其一 / 其二 / … */
 const CN_NUMERALS = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
@@ -30,6 +32,9 @@ export default function PostCard({ post, index, dimmed = false }: PostCardProps)
   const readTime = Math.max(1, Math.ceil(wordCount / 300))
   // 未命中条目:视觉衰减保留,但其链接移出 Tab 顺序(文章变多后键盘成本可控)
   const linkTabIndex = dimmed ? -1 : undefined
+  // 当前检索词:点进文章后用于正文马克笔高亮
+  const [searchParams] = useSearchParams()
+  const q = searchParams.get('q') ?? undefined
 
   return (
     <div className={`transition-opacity duration-300 ${dimmed ? 'opacity-30' : ''}`}>
@@ -45,10 +50,13 @@ export default function PostCard({ post, index, dimmed = false }: PostCardProps)
         <div className="min-w-0">
           <PostLink
             slug={post.slug}
+            query={q}
             tabIndex={linkTabIndex}
-            className="block text-xl md:text-2xl font-semibold tracking-[-0.015em] text-foreground hover:underline underline-offset-4 mb-2"
+            className="group block text-xl md:text-2xl font-semibold tracking-[-0.015em] text-foreground mb-2"
           >
-            {post.title}
+            <Highlighter action="underline" hoverOnly strokeWidth={1.5} animationDuration={300} iterations={1}>
+              {post.title}
+            </Highlighter>
           </PostLink>
 
           <p className="text-muted-foreground leading-7 mb-3 line-clamp-2">{post.excerpt}</p>

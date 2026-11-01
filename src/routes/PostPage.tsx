@@ -5,7 +5,7 @@ import PostContent from '@/components/post/PostContent'
 import TableOfContents from '@/components/post/TableOfContents'
 import MobileToc from '@/components/post/MobileToc'
 import PostLink from '@/components/post/PostLink'
-import LineReveal from '@/components/LineReveal'
+import BlurFade from '@/components/ui/BlurFade'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useNoIndex } from '@/hooks/useNoIndex'
@@ -64,13 +64,10 @@ export default function PostPage() {
         </Link>
 
         <article>
-          {/* 签名动效:标题逐行揭示 */}
-          <LineReveal
-            key={post.slug}
-            text={post.title}
-            as="h1"
-            className="text-3xl md:text-4xl font-bold mb-8"
-          />
+          {/* 标题 Blur In by Text:整体模糊淡入 */}
+          <BlurFade key={post.slug} duration={0.6} offset={6} blur="8px">
+            <h1 className="text-3xl md:text-4xl font-bold mb-8">{post.title}</h1>
+          </BlurFade>
 
           {/* YAML 元数据块:等宽、固定宽标签 + 内联值 */}
           <div className="font-mono text-sm leading-7 mb-8" aria-label="文章元数据">
