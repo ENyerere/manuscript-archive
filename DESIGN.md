@@ -56,7 +56,7 @@ components:
 
 这个博客不是"网站",而是一叠被持续修订的手稿:每篇文章是一个有版本、有元数据、被认真归档的文档。视觉语言来自纯文本世界——等宽字体、YAML front matter、细线、留白的纸面——而非来自 UI 组件库。技术感不靠霓虹与终端绿表达,而靠排版的纪律性表达:对齐、字距、行高、分隔线,全部有据可依。
 
-明暗主题互为严格反转,共用一套语义命名;信息层级完全由墨(ink)与纸(paper)的明度对比、字重与留白驱动。动效克制到只剩两种签名:文章标题的逐行揭示(内容入场)与主题切换的圆形扩散(全局状态反转)——墨晕于纸,暗合手稿隐喻。
+明暗主题互为严格反转,共用一套语义命名;信息层级完全由墨(ink)与纸(paper)的明度对比、字重与留白驱动。动效克制:文章标题的 Blur In 模糊淡入(内容入场)与主题切换的圆形扩散(全局状态反转)为签名;交互处点缀手绘质感——hover 的手绘细线、检索命中的马克笔涂抹——墨晕于纸,暗合手稿隐喻。
 
 **Key Characteristics:**
 - 纯单色双色系统,全站无主题色相;链接靠下划线而非颜色识别
@@ -97,7 +97,7 @@ components:
 
 ### Hierarchy
 
-- **Display** (700, 字距 -0.03em):页脚超大联系排版(4xl–6xl)、文章页 H1。H1 入场配逐行揭示动画(1400ms,cubic-bezier(0.19,1,0.22,1),逐行错峰 140ms)。
+- **Display** (700, 字距 -0.03em):页脚超大联系排版(4xl–6xl)、文章页 H1。H1 入场配 Blur In 模糊淡入(600ms,8px 模糊 + 位移)。
 - **Headline** (600, 字距 -0.015em):章节标题、页面标题。
 - **Title** (继承正文字号,不过度加粗):文章列表条目标题——手稿目录里标题不需要喊。
 - **Body** (400, 18px 桌面 / 16px 移动, 行高 1.75, measure ≈ 68ch):长文阅读。
@@ -116,7 +116,7 @@ components:
 
 - **页面骨架**:页头左站点名、右导航,下方一条 hairline;sticky 时背景实色 paper(不用毛玻璃)。索引页页头下可加一条 3px 墨粗规则线作全站签名分隔(文章页省略)。容器最大宽度 72rem,页边距 24px(移动)/32px(桌面)。
 - **索引页**:大留白(纵向 padding 6–8rem 量级)。文章列表无卡片:每篇一行条目,条目结构 = 左侧等宽日期栏(YYYY-MM-DD,固定宽度)+ 标题 + 静音摘要,条目间 hairline 分隔(padding 24px)。桌面端允许奇数条目右移 ≤2rem 的错落,呼应"散落手稿",移动端取消错落。
-- **文章页**:单栏居中阅读栏(measure ≈ 68ch);头部顺序:标题(逐行揭示)→ YAML 元数据块 → hairline → 正文。右栏 TOC 在 xl 断点(1280px)出现,hairline 风格,当前章节用字重 + 左侧短粗线指示。上一篇/下一篇为 hairline 分隔的文字链接行。
+- **文章页**:单栏居中阅读栏(measure ≈ 68ch);头部顺序:标题(Blur In 模糊淡入)→ YAML 元数据块 → hairline → 正文。右栏 TOC 在 xl 断点(1280px)出现,hairline 风格,当前章节用字重 + 左侧短粗线指示。上一篇/下一篇为 hairline 分隔的文字链接行。
 - **页脚**:反转为墨色块(ink 底 paper 字),超大联系排版收尾,形成明确的"卷末"感。
 - **移动端**:单栏,元数据栏折行到标题上方;桌面 TOC 改为正文前折叠目录(+ / × 约定,点节标题跳转后自动收起);页头导航折叠为汉堡按钮,点击展开全屏索引页(非抽屉):整页覆盖,大字号序号目录(01–04,hairline 分隔),300ms 淡入 + 目录行 70ms 错峰上浮,300ms 淡出卸载,Esc 可关,打开时锁定背景滚动。
 - **视口稳定**:html 始终显示纵向滚动条(8px 单色自绘),短页与长页切换时视口宽度恒定,消除布局横移。
@@ -145,7 +145,8 @@ components:
 
 ### Text Links
 - **Style:** 继承 ink,常显下划线(offset 3px)
-- **Hover:** 页脚/社交链接用下划线生长动画(.u-line):2px 线段从左到右 scaleX 生长(200ms);线高必须 2px——1px 在半像素对齐时会被抗锯齿拆淡
+- **Hover(手绘细线):** 文章条目标题、关于页/页脚社交与 RSS 链接用 Highlighter 组件(rough-notation)——hover 时画出略带抖动的下划线(300ms);短文本(社交链接)双线叠加(iterations 2)增强手绘感,长标题单线(iterations 1)
+- **Hover(普通链接):** 返回/导航等仍用 .u-line 生长动画(2px 线段 scaleX 生长 200ms);线高必须 2px——1px 在半像素对齐时会被抗锯齿拆淡
 
 ### Filter Chips(过滤器约定)
 - **Style:** 纯文字按钮,无底色、无边框、无 Badge 色块
@@ -170,12 +171,26 @@ components:
 - **Mobile:** 汉堡按钮 → 全屏索引页(序号 01–04 大字号目录,hairline 分隔,当前页下划线 +「当前」标记,顶行 索引 / INDEX + × 关闭,底部卷末标记);菜单打开期间页头整体淡出隐藏(300ms opacity/visibility,占位不变),其职责由索引页顶行接管
 
 ### Footer(卷末)
-- **Style:** 整页唯一大面积色块:ink 底 paper 字的反转;超大字号(Display)署名 + 文字社交链接(u-line 下划线生长)+ RSS;底部 hairline(border-background/20)上版权行与 ICP 备案号
+- **Style:** 整页唯一大面积色块:ink 底 paper 字的反转;超大字号(Display)署名 + 文字社交链接(手绘细线 hover)+ RSS;底部 hairline(border-background/20)上版权行与 ICP 备案号
 
 ### Theme Toggle(签名动效)
 - **桌面/现代浏览器:** 新主题快照以 clip-path: circle() 从点击位置扩散覆盖全屏(500ms, ease-in-out,View Transitions API)
 - **降级:** iOS WebKit / 不支持 View Transitions → 单元素遮罩擦除(.theme-wipe:目标主题色全屏遮罩 150ms 淡入 → 遮罩下主题瞬时翻转 → 220ms 淡出);不要回退到全 DOM 逐元素颜色渐变(iOS 会分批调度导致文字变色撕裂)
 - **reduced-motion:** 纯瞬时切换
+
+### Blur In(模糊淡入)
+- **组件 BlurFade:** 纯 CSS + IntersectionObserver 复刻,零依赖(不重新引入 framer-motion)
+- **应用:** 文章页标题、关于页姓名与区块入场;8px 模糊 + 位移,600ms,进入视口触发
+- **reduced-motion:** 直接呈现最终状态
+
+### Marker Search Hits(马克笔检索高亮)
+- **链路:** 检索词经 ?q= 带入文章页,正文匹配处做马克笔涂抹(代码块/脚本除外)
+- **单色反选:** 85% 不透明墨底 + 纸字(暗色反之),两遍涂抹叠加——叠加区近实底保证醒目,单层区留朦胧边缘;与 ::selection 的墨纸反转同一语言
+- **组件 Highlighter:** rough-notation 封装,单色(currentColor),尊重 reduced-motion
+
+### Fade In by Line(段落逐行淡入)
+- **应用:** 文章页块级元素(p/li/h2/h3/blockquote/pre/table)进入视口时淡入(500ms,translateY 8px)
+- 仅播一次,底部留 8% 边距提前入场;reduced-motion 直接显示
 
 ## Do's and Don'ts
 
@@ -184,7 +199,7 @@ components:
 - **Do** 元数据一律 JetBrains Mono,标签名固定宽度约 6em,保持 YAML 块的对齐纪律
 - **Do** 新增颜色时同时定义明暗两值,并保持"暗色 = 严格反转"的语义
 - **Do** 交互反馈用下划线生长、字重变化、bracket 符号、opacity 衰减——单色工具箱已经够用
-- **Do** 动效保持克制:入场 opacity + translateY(8px) 错峰(400ms),过滤衰减 300ms,下划线生长 200ms;每个动画都要有明确目的
+- **Do** 动效保持克制:入场 Blur In(600ms)或 opacity + translateY(8px) 错峰(400ms),过滤衰减 300ms,hover 手绘细线 300ms,段落淡入 500ms;每个动画都要有明确目的
 - **Do** iOS 上禁用 View Transitions,用 .theme-wipe 单元素遮罩擦除做降级补偿
 
 ### Don't:
@@ -193,4 +208,4 @@ components:
 - **Don't** 用颜色单独传达状态(链接、激活态、错误);必须配下划线/字重/符号/文字
 - **Don't** 给中文标题用斜体,或给中文标签强行 uppercase
 - **Don't** 给关键信息或可操作元素使用 ink-3 静音色(它低于 AA 是刻意取舍,仅限元数据)
-- **Don't** 新增签名动效;逐行揭示与主题扩散之外,动效一律次级规格
+- **Don't** 新增签名动效;Blur In 与主题扩散之外,动效一律次级规格
