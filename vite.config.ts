@@ -218,18 +218,24 @@ function githubDataPlugin(): Plugin {
 
       if (id === RESOLVED_PROJECTS_ID) {
         const owner = repos[0]?.html_url.match(/github\.com\/([^/]+)/)?.[1] ?? 'ENyerere'
-        const projects: Project[] = projectConfigs.map((c) => {
-          const r = live.get(c.repo)
-          return {
-            repo: c.repo,
-            title: c.title ?? c.repo,
-            description: c.description ?? r?.description ?? '',
-            url: r?.html_url ?? `https://github.com/${owner}/${c.repo}`,
-            language: r?.language ?? null,
-            stars: r?.stargazers_count ?? 0,
-            pushedAt: r?.pushed_at ?? '',
-          }
-        })
+        const projects: Project[] = await Promise.all(
+          projectConfigs.map(async (c) => {
+            const projectOwner = c.owner ?? owner
+            // 当前账户复用仓库列表;协作仓库按 owner/repo 单独获取公开元数据
+            const r = c.owner && c.owner !== owner
+              ? await fetchJson<GhRepo>(`https://api.github.com/repos/${c.owner}/${c.repo}`)
+              : live.get(c.repo)
+            return {
+              repo: c.repo,
+              title: c.title ?? c.repo,
+              description: c.description ?? r?.description ?? '',
+              url: r?.html_url ?? `https://github.com/${projectOwner}/${c.repo}`,
+              language: r?.language ?? null,
+              stars: r?.stargazers_count ?? 0,
+              pushedAt: r?.pushed_at ?? '',
+            }
+          }),
+        )
         return `export default ${JSON.stringify(projects)}`
       }
 

@@ -14,5 +14,5 @@ export const profile: Profile = {
   name: '小峄热心市民',
   role: 'Student',
   avatar: { src: avatar128, srcSet: `${avatar128} 1x, ${avatar256} 2x` },
-  about: '一名普通大学生,喜欢前端开发与软件测试,偶尔写写代码,常常写写文字。这里是我的手稿档案:记录学习,也记录生活。',
+  about: '在读计科大学生，平常的爱好是将一些没用的东西上传到微软的服务器以增加其负担。偶尔写点废话发到这个页面',
 }

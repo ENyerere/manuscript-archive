@@ -6,4 +6,4 @@
  */
 export const fallbackLanguages: string[] = ['TypeScript', 'Python', 'Vue', 'C/C++', 'Java', 'PHP']
 
-export const disciplines: string[] = ['软件测试']
+export const disciplines: string[] = ['软件开发']
