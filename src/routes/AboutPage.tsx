@@ -6,6 +6,7 @@ import { socials } from '@/data/socials'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import Highlighter from '@/components/ui/Highlighter'
 import BlurFade from '@/components/ui/BlurFade'
+import ContributionHeatmap from '@/components/profile/ContributionHeatmap'
 
 /**
  * 关于页:单栏阅读宽度,hairline 分节,无卡片。
@@ -31,6 +32,9 @@ export default function AboutPage() {
         <p className="font-mono text-sm text-muted-foreground mb-6">{profile.role}</p>
         <p className="leading-8 text-foreground/90">{profile.about}</p>
       </header>
+
+      {/* GitHub 年度贡献:构建期注入,悬停日期时在标题右侧显示单日摘要 */}
+      <ContributionHeatmap />
 
       {/* 技能:语言(GitHub 代码量自动聚合)+ 方向(人工策展) */}
       <BlurFade inView>

@@ -52,3 +52,9 @@ declare module 'virtual:github-languages' {
   const value: { name: string; percent: number }[]
   export default value
 }
+
+declare module 'virtual:github-contributions' {
+  import type { ContributionData } from '@/lib/contributions'
+  const value: ContributionData | null
+  export default value
+}

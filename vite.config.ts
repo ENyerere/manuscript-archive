@@ -154,19 +154,21 @@ interface GhRepo {
 }
 
 function githubDataPlugin(): Plugin {
+  const CONTRIBUTIONS_ID = 'virtual:github-contributions'
+  const RESOLVED_CONTRIBUTIONS_ID = '\0' + CONTRIBUTIONS_ID
   // 同一次构建内共享仓库列表,避免重复请求
   let reposPromise: Promise<GhRepo[]> | null = null
 
   /**
-   * 构建期拉取 GitHub API:优先全局 fetch;
+   * 构建期拉取 GitHub 公开数据:优先全局 fetch;
    * 失败时(典型:本机代理/安全软件 MITM 拦截 TLS,校验报 UNABLE_TO_VERIFY_LEAF_SIGNATURE)
    * 回退到 node:https 并跳过证书校验——仅用于公开只读数据,不影响站点安全。
    */
-  async function fetchJson<T>(url: string): Promise<T | null> {
+  async function fetchText(url: string): Promise<string | null> {
     const headers = { 'User-Agent': 'easy-web-build', Accept: 'application/vnd.github+json' }
     try {
       const res = await fetch(url, { headers })
-      if (res.ok) return (await res.json()) as T
+      if (res.ok) return await res.text()
     } catch {
       // 进入 https 回退
     }
@@ -180,16 +182,20 @@ function githubDataPlugin(): Plugin {
           }
           let body = ''
           res.on('data', (chunk) => (body += chunk))
-          res.on('end', () => {
-            try {
-              resolve(JSON.parse(body) as T)
-            } catch {
-              resolve(null)
-            }
-          })
+          res.on('end', () => resolve(body))
         })
         .on('error', () => resolve(null))
     })
+  }
+
+  async function fetchJson<T>(url: string): Promise<T | null> {
+    const body = await fetchText(url)
+    if (!body) return null
+    try {
+      return JSON.parse(body) as T
+    } catch {
+      return null
+    }
   }
 
   async function fetchRepos(): Promise<GhRepo[]> {
@@ -209,15 +215,18 @@ function githubDataPlugin(): Plugin {
     resolveId(id) {
       if (id === GITHUB_PROJECTS_ID) return RESOLVED_PROJECTS_ID
       if (id === GITHUB_LANGUAGES_ID) return RESOLVED_LANGUAGES_ID
+      if (id === CONTRIBUTIONS_ID) return RESOLVED_CONTRIBUTIONS_ID
     },
     async load(id) {
-      if (id !== RESOLVED_PROJECTS_ID && id !== RESOLVED_LANGUAGES_ID) return null
+      if (![RESOLVED_PROJECTS_ID, RESOLVED_LANGUAGES_ID, RESOLVED_CONTRIBUTIONS_ID].includes(id)) {
+        return null
+      }
       reposPromise ??= fetchRepos()
       const repos = await reposPromise
       const live = new Map(repos.map((r) => [r.name, r]))
+      const owner = repos[0]?.html_url.match(/github\.com\/([^/]+)/)?.[1] ?? 'ENyerere'
 
       if (id === RESOLVED_PROJECTS_ID) {
-        const owner = repos[0]?.html_url.match(/github\.com\/([^/]+)/)?.[1] ?? 'ENyerere'
         const projects: Project[] = await Promise.all(
           projectConfigs.map(async (c) => {
             const projectOwner = c.owner ?? owner
@@ -237,6 +246,13 @@ function githubDataPlugin(): Plugin {
           }),
         )
         return `export default ${JSON.stringify(projects)}`
+      }
+
+      if (id === RESOLVED_CONTRIBUTIONS_ID) {
+        const html = await fetchText(`https://github.com/users/${owner}/contributions`)
+        const { parseContributions } = await import('./build/githubContributions')
+        const contributions = html ? parseContributions(html) : null
+        return `export default ${JSON.stringify(contributions)}`
       }
 
       // 语言占比:逐仓库拉 linguist 字节数聚合,fork 不计(避免算上别人的代码)
