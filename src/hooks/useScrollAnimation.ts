@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
+import { scrollToTop as scrollToTopWithLenis } from '@/lib/smoothScroll'
 
 /** 用户是否偏好减少动态效果 */
 function prefersReducedMotion(): boolean {
@@ -16,9 +17,9 @@ export function useScrollAnimation() {
   // 回到顶部按钮是否可见
   const [backToTopVisible, setBackToTopVisible] = useState<boolean>(false)
 
-  // 滚动到顶部(reduced-motion 时瞬时跳转)
+  // Lenis 激活时由其接管,否则沿用原生平滑/瞬时跳转
   const scrollToTop = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
+    scrollToTopWithLenis(prefersReducedMotion())
   }, [])
 
   useEffect(() => {

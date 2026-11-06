@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { TocItem } from '@/lib/toc'
+import { scrollToElement } from '@/lib/smoothScroll'
 
 interface TableOfContentsProps {
   items: TocItem[]
@@ -68,7 +69,7 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
     unlockTimerRef.current = setTimeout(() => {
       lockRef.current = false
     }, 1000)
-    target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
+    scrollToElement(target, reduced)
     setActiveId(id)
     // 瞬时跳转不产生连续滚动事件,直接解锁
     if (reduced) lockRef.current = false

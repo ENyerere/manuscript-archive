@@ -153,6 +153,7 @@ export default function Header() {
           role="dialog"
           aria-modal="true"
           aria-label="站点导航"
+          data-lenis-prevent
           className={`fixed inset-0 z-50 md:hidden bg-background flex flex-col transition-opacity duration-300 ${
             menuVisible ? 'opacity-100' : 'opacity-0'
           }`}

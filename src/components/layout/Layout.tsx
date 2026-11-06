@@ -1,12 +1,16 @@
+import { useEffect } from 'react'
 import { Outlet, ScrollRestoration } from 'react-router-dom'
 import Header from './Header'
 import Footer from './Footer'
 import ScrollProgress from './ScrollProgress'
 import BackToTop from './BackToTop'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
+import { initSmoothScroll } from '@/lib/smoothScroll'
 
 export default function Layout() {
   const { scrollProgressRef, backToTopVisible, scrollToTop } = useScrollAnimation()
+
+  useEffect(() => initSmoothScroll(), [])
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
