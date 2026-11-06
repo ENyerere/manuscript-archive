@@ -1,11 +1,14 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Layout from '@/components/layout/Layout'
 import HomePage from '@/routes/HomePage'
+import ArchivesPage from '@/routes/ArchivesPage'
+import TagsPage from '@/routes/TagsPage'
+import AboutPage from '@/routes/AboutPage'
 import { loadPostBody } from '@/content/posts'
 import RouteError from '@/routes/RouteError'
 
-// 路由级代码分割:使用 React Router 的 route.lazy 而非 React.lazy + Suspense。
-// 关键差异:route.lazy 导航期间保留旧页面渲染,模块就绪后再切换,
+// 四个核心导航页面随主包加载,避免无缓存首次切换时等待极小的页面 chunk。
+// 文章与次级页面仍用 route.lazy:导航期间保留旧页面,模块就绪后再切换,
 // 不存在"加载中…"兜底 UI 出场的机会,从机制上消除闪屏。
 const loadPostPage = () => import('@/routes/PostPage')
 // 模块求值即预热文章页 chunk:与主包并行下载,用户进站后首次点击文章时通常已就绪
@@ -35,11 +38,11 @@ const router = createBrowserRouter(
               loader: ({ params }) => (params.slug ? loadPostBody(params.slug) : null),
               lazy: lazyRoute(loadPostPage),
             },
-            { path: 'archives', lazy: lazyRoute(() => import('@/routes/ArchivesPage')) },
-            { path: 'tags', lazy: lazyRoute(() => import('@/routes/TagsPage')) },
+            { path: 'archives', element: <ArchivesPage /> },
+            { path: 'tags', element: <TagsPage /> },
             { path: 'tags/:tag', lazy: lazyRoute(() => import('@/routes/TagPage')) },
             { path: 'series/:name', lazy: lazyRoute(() => import('@/routes/SeriesPage')) },
-            { path: 'about', lazy: lazyRoute(() => import('@/routes/AboutPage')) },
+            { path: 'about', element: <AboutPage /> },
             { path: '*', lazy: lazyRoute(() => import('@/routes/NotFoundPage')) },
           ],
         },
