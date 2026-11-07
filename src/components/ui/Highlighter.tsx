@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { annotate } from 'rough-notation'
 import type { RoughAnnotation, RoughAnnotationType } from 'rough-notation/lib/model.js'
+import { setPathsPlayback } from '../../lib/annotationPlayback'
 
 interface HighlighterProps {
   children: React.ReactNode
@@ -60,14 +61,34 @@ export default function Highlighter({
     return () => annotation.remove()
   }, [action, color, strokeWidth, animationDuration, iterations, padding, multiline, hoverOnly])
 
-  // hover 模式:监听父级 group 的 hover 播/收
+  // hover 模式:监听父级 group,移出时沿原路径以 1.75 倍速收回
   useEffect(() => {
     if (!hoverOnly) return
     const el = ref.current
     const group = el?.closest('.group')
     if (!el || !group) return
-    const show = () => annotationRef.current?.show()
-    const hide = () => annotationRef.current?.hide()
+    const svg = el.nextElementSibling?.matches('svg.rough-annotation')
+      ? el.nextElementSibling
+      : null
+    // 路径在首次 show() 时才生成,因此每次交互都读取当前路径
+    const getPaths = () => Array.from(svg?.querySelectorAll('path') ?? []) as SVGPathElement[]
+    const show = () => {
+      const annotation = annotationRef.current
+      if (!annotation) return
+      if (annotation.isShowing()) {
+        // 展开或收回途中重新进入,从当前位置继续,不重播整条线
+        if (setPathsPlayback(getPaths(), 1) > 0) return
+        annotation.hide()
+      }
+      annotation.show()
+    }
+    const hide = () => {
+      const annotation = annotationRef.current
+      if (!annotation) return
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      if (!reduceMotion && setPathsPlayback(getPaths(), -1.75) > 0) return
+      annotation.hide()
+    }
     group.addEventListener('mouseenter', show)
     group.addEventListener('mouseleave', hide)
     return () => {
