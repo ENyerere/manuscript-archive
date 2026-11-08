@@ -13,4 +13,5 @@ export const TAG_WHITELIST = [
   '部署',
   '性能',
   '写作',
+  '计组',
 ] as const

@@ -7,6 +7,7 @@ import https from 'node:https'
 import { projectConfigs, type Project } from './src/data/projects'
 import { postsPlugin, getPosts, publishedPosts, POSTS_DIR } from './build/posts'
 import { staticPagesPlugin } from './build/staticPages'
+import { feedHtml } from './build/feedHtml'
 
 /**
  * F4 版本历史:构建期为每篇文章取 git 短 hash 与修订次数,
@@ -86,12 +87,6 @@ function xmlEscape(s: string): string {
     .replace(/'/g, '&apos;')
 }
 
-/** RSS 全文:根相对链接改写为绝对地址(阅读器里没有站点上下文);]]> 拆开避免提前闭合 CDATA */
-function feedHtml(html: string): string {
-  const absolute = html.replace(/(href|src)="\/(?!\/)/g, `$1="${SITE_URL}/`)
-  return `<![CDATA[${absolute.replace(/]]>/g, ']]]]><![CDATA[>')}]]>`
-}
-
 function rssFeedPlugin(): Plugin {
   return {
     name: 'rss-feed',
@@ -108,7 +103,7 @@ function rssFeedPlugin(): Plugin {
       <guid isPermaLink="true">${link}</guid>
       <pubDate>${new Date(p.createdAt).toUTCString()}</pubDate>
       <description>${xmlEscape(p.excerpt)}</description>
-      <content:encoded>${feedHtml(p.html)}</content:encoded>${cats ? `\n${cats}` : ''}
+      <content:encoded>${feedHtml(p.html, SITE_URL)}</content:encoded>${cats ? `\n${cats}` : ''}
     </item>`
         })
         .join('\n')
